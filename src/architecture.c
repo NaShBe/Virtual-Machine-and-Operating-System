@@ -1,33 +1,77 @@
 #include "architecture.h"
 #include "instructions.h"
 
+#define INTRPT_RESET 0x0
+#define INTRPT_UNDEFINED 0x1
+
+#define CORE_PARALLEL FALSE		// This establishes if instruction pipelining happens.
+#define CORE_STEPS 3		// This is how many steps are taken to complete one CPU instruction (fetching, decoding, executing)
+
+typedef struct 
+{
+	arch_word ac;
+	const arch_word zr;
+	arch_word reg[14];
+	arch_addr pc;
+	instruction ir;
+	arch_word sp;
+} arch_registers;
+
 typedef struct
 {
 	arch_addr reset;
 	arch_addr undefined;
 	arch_addr software;
-} interrupt_table;
+} arch_interrupt_table;
+
+typedef struct
+{
+	arch_word oprand1;
+	arch_word oprand2;
+} arch_alu;
 
 typedef struct
 {
 
-} PCB;
+} arch_dma;
 
-registers cpu_regs __attribute__((section("nberaki_cpu_regs")));
-static char ram[1024 * 4] __attribute__((section("nberaki_ram")));
-static char disk[2048 * 4] __attribute__((section("nberaki_disk")));
 
-void init_cpu()
+typedef struct
 {
-	cpu_regs.pc = &ram;
+	arch_registers core_regs;
+	arch_alu alu;
+	void (*pipeline[CORE_STEPS])(arch_core*);
+} arch_core;
+
+static volatile char ram[RAM_SIZE * 4] __attribute__((section("nberaki_ram")));
+
+arch_core* init_core()
+{
+	static arch_core core = {.core_regs = {0}, .pipeline = {fetch, decode, no_op}};
+	return &core;
 }
 
-static void decode()
+void cycle (arch_core* core)
 {
-	switch GET_FORMAT(cpu_regs.ir.instr_data)
+	for (unsigned int i = 0; i < CORE_STEPS; i++)
+	{
+		core->pipeline[i](core);
+	}
+}
+
+static inline void fetch(arch_core* core)
+{
+	core->core_regs.ir.instr_data = core->core_regs.pc;
+	core->core_regs.pc++;
+}
+
+static void decode(arch_core* core)
+{
+	switch GET_FORMAT(core->core_regs.ir.instr_data)
 	{
 		case FORMAT_AIF:
-			switch (GET_OPCODE(cpu_regs.ir.instr_data))
+			if (0xFFFF & core->core_regs.ir.instr_data != 0) return; //TODO
+			switch (GET_OPCODE(core->core_regs.ir.instr_data))
 			{
 				case MOV:
 					break;
@@ -46,18 +90,18 @@ static void decode()
 				case SLT:
 					break;
 				default:
-					return;		//TODO
+					return;
 			}
 			break;
 		case FORMAT_CBIF:
-			switch (GET_OPCODE(cpu_regs.ir.instr_data))
+			switch (GET_OPCODE(core->core_regs.ir.instr_data))
 			{
 				case 0:			//TODO
 					break;
 			}
 			break;
 		case FORMAT_UJF:
-			switch (GET_OPCODE(cpu_regs.ir.instr_data))
+			switch (GET_OPCODE(core->core_regs.ir.instr_data))
 			{
 				case HTL:
 					break;
@@ -68,7 +112,7 @@ static void decode()
 			}
 			break;
 		case FORMAT_IOIF:
-			switch (GET_OPCODE(cpu_regs.ir.instr_data))
+			switch (GET_OPCODE(core->core_regs.ir.instr_data))
 			{
 				case RD:
 					break;
@@ -81,19 +125,29 @@ static void decode()
 		default:
 			return;		//TODO
 	}
-	execute(GET_OPCODE(cpu_regs.ir.instr_data));
 }
 
-static inline void fetch()
+static void inline no_op(arch_core* core)
 {
-	cpu_regs.ir.instr_data = cpu_regs.pc;
-	cpu_regs.pc++;
+	return;
 }
 
-static void execute(unsigned char opcode)
+static void read(arch_core* core)
 {
-	switch (opcode)
-	{
-		
-	}
+
+}
+
+static void write(arch_core* core)
+{
+
+}
+
+static void store(arch_core* core)
+{
+
+}
+
+static void load(arch_core* core)
+{
+
 }

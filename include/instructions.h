@@ -1,6 +1,8 @@
 #ifndef NBERAKI_INSTRUCTIONS_H
 #define NBERAKI_INSTRUCTIONS_H
 
+#define TRUE 1
+#define FALSE 0
 // Format Defines
 // first two bits of instruction, determines type
 #define FORMAT_AIF  0x00	//
@@ -48,7 +50,7 @@ typedef union
 		unsigned int opcode: 6;
 		unsigned int data: 24;
 	};
-}instruction_t;
+}instruction;
 
 typedef union
 {
