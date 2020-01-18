@@ -6,12 +6,13 @@
 
 #define CORE_PARALLEL FALSE		// This establishes if instruction pipelining happens.
 #define CORE_STEPS 3		// This is how many steps are taken to complete one CPU instruction (fetching, decoding, executing)
+// NOTE: execution step must always be the last step.
 
 typedef struct 
 {
 	arch_word ac;
 	const arch_word zr;
-	arch_word reg[14];
+	arch_word gen_reg[14];
 	arch_addr pc;
 	instruction ir;
 	arch_word sp;
@@ -21,24 +22,27 @@ typedef struct
 {
 	arch_addr reset;
 	arch_addr undefined;
-	arch_addr software;
+	arch_addr dma;
+	arch_addr ;
 } arch_interrupt_table;
 
 typedef struct
 {
 	arch_word oprand1;
 	arch_word oprand2;
+	arch_word instr;
+	arch_addr output;
 } arch_alu;
 
 typedef struct
 {
-
+		
 } arch_dma;
 
 
 typedef struct
 {
-	arch_registers core_regs;
+	arch_registers regs;
 	arch_alu alu;
 	void (*pipeline[CORE_STEPS])(arch_core*);
 } arch_core;
@@ -47,11 +51,11 @@ static volatile char ram[RAM_SIZE * 4] __attribute__((section("nberaki_ram")));
 
 arch_core* init_core()
 {
-	static arch_core core = {.core_regs = {0}, .pipeline = {fetch, decode, no_op}};
+	static arch_core core = {.regs = {0}, .pipeline = {fetch, decode, no_op}};
 	return &core;
 }
 
-void cycle (arch_core* core)
+void cycle(arch_core* core)
 {
 	for (unsigned int i = 0; i < CORE_STEPS; i++)
 	{
@@ -61,47 +65,40 @@ void cycle (arch_core* core)
 
 static inline void fetch(arch_core* core)
 {
-	core->core_regs.ir.instr_data = core->core_regs.pc;
-	core->core_regs.pc++;
+	core->regs.ir.instr_data = core->regs.pc;
+	core->regs.pc++;
 }
 
 static void decode(arch_core* core)
 {
-	switch GET_FORMAT(core->core_regs.ir.instr_data)
+	switch (core->regs.ir.format)
 	{
 		case FORMAT_AIF:
-			if (0xFFFF & core->core_regs.ir.instr_data != 0) return; //TODO
-			switch (GET_OPCODE(core->core_regs.ir.instr_data))
+			if (((arith_data)core->regs.ir.data).zr != 0)
 			{
-				case MOV:
-					break;
-				case ADD:
-					break;
-				case SUB:
-					break;
-				case MUL:
-					break;
-				case DIV:
-					break;
-				case AND:
-					break;
-				case OR:
-					break;
-				case SLT:
-					break;
-				default:
+				return; //TODO, perform undefined instruction interrupt;
+			}
+			switch (core->regs.ir.opcode)
+			{
+				case SLT: case MOV ... OR:
+					core->alu.instr = core->regs.ir.opcode;
+					core->alu.oprand1 = ((arith_data)core->regs.ir.data).src1;
+					core->alu.oprand2 = ((arith_data)core->regs.ir.data).src2;
+					core->pipeline[CORE_STEPS - 1] = arithm;
 					return;
+				default:
+					return; //TODO, perform undefined instruction interrupt;
 			}
 			break;
 		case FORMAT_CBIF:
-			switch (GET_OPCODE(core->core_regs.ir.instr_data))
+			switch (core->regs.ir.opcode)
 			{
 				case 0:			//TODO
 					break;
 			}
 			break;
 		case FORMAT_UJF:
-			switch (GET_OPCODE(core->core_regs.ir.instr_data))
+			switch (core->regs.ir.opcode)
 			{
 				case HTL:
 					break;
@@ -112,7 +109,7 @@ static void decode(arch_core* core)
 			}
 			break;
 		case FORMAT_IOIF:
-			switch (GET_OPCODE(core->core_regs.ir.instr_data))
+			switch (core->regs.ir.opcode)
 			{
 				case RD:
 					break;
@@ -150,4 +147,21 @@ static void store(arch_core* core)
 static void load(arch_core* core)
 {
 
+}
+
+static void arithm(arch_core* core)
+{
+	switch(core->alu.instr)
+	{
+		case MOV:
+			break;	//TODO
+		case ADD:
+			break;
+		case SUB:
+			break;
+		case MUL:
+			break;
+		case DIV:
+			break;
+	}
 }

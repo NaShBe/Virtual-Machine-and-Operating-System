@@ -5,13 +5,15 @@
 #define DISK_SIZE 2048
 
 #include "instructions.h"
+#include "dma_controller.h"
 
 typedef unsigned int arch_word;
-typedef arch_word arch_addr;
+typedef unsigned int arch_addr;
 
-typedef struct
-{
-	/* data */
-} arch_dma;
+typedef struct arch_core;
+typedef struct arch_dma;
+
+extern arch_core* init_core();
+extern void cycle(arch_core*);
 
 #endif

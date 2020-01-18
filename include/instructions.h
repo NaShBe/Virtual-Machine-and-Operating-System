@@ -3,12 +3,13 @@
 
 #define TRUE 1
 #define FALSE 0
+#define NULL 0
 // Format Defines
 // first two bits of instruction, determines type
-#define FORMAT_AIF  0x00	//
+#define FORMAT_AIF  0x00	// Arithmatic format
 #define FORMAT_CBIF 0x01	//
-#define FORMAT_UJF 0x02	//
-#define FORMAT_IOIF 0x03	// I/O type, 
+#define FORMAT_UJF 0x02		//
+#define FORMAT_IOIF 0x03	// I/O format
 
 #define RD 0x00		// Load contents of input buffer into the accumulator
 #define WR 0x01		// Write the contents of accumulator into output buffer
@@ -44,9 +45,9 @@
 typedef union
 {
 	unsigned int instr_data;
-	struct fields
+	struct
 	{
-		unsigned int type: 2;
+		unsigned int format: 2;
 		unsigned int opcode: 6;
 		unsigned int data: 24;
 	};
@@ -54,20 +55,20 @@ typedef union
 
 typedef union
 {
-	unsigned int data: 24;
-	struct fields
+	unsigned int data: 24;		// uint-compatable representation
+	struct
 	{
-		unsigned int src1: 4;
+		unsigned int src1: 4;	
 		unsigned int src2: 4;
 		unsigned int dest: 4;
-		const unsigned int zr: 12;
+		const unsigned int zr: 12;	// the last 12 bits must be zero
 	};
 } arith_data;
 
 typedef union
 {
-	unsigned int data: 24;
-	struct fields
+	unsigned int data: 24;		// uint-compatable representation
+	struct
 	{
 		unsigned int breg: 4;
 		unsigned int dreg: 4;
@@ -77,13 +78,14 @@ typedef union
 
 typedef union
 {
-	unsigned int data: 24;
-	struct fields
+	unsigned int data: 24;		// uint-compatable representation
+	struct
 	{
 		unsigned int reg1: 4;
 		unsigned int reg2: 4;
 		unsigned int addr: 16;
 	};
 };
+
 
 #endif
