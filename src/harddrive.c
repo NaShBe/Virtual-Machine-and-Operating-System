@@ -28,9 +28,6 @@ typedef struct
     char storage[DISK_SIZE * 4] __attribute__((section("nberaki_disk"))); 
 } arch_disk;
 
-
-
-
 static arch_disk disk;
 
 void access_disk(arch_dma* disk_dma)

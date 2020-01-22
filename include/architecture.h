@@ -10,8 +10,8 @@
 typedef unsigned int arch_word;
 typedef unsigned int arch_addr;
 
-typedef struct arch_core;
-typedef struct arch_dma;
+typedef struct arch_core arch_core;
+typedef struct arch_dma arch_dma;
 
 extern arch_core* init_core();
 extern void cycle(arch_core*);

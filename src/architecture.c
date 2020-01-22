@@ -34,18 +34,17 @@ typedef struct
 	arch_addr output;
 } arch_alu;
 
-typedef struct
+struct arch_dma
 {
-		
-} arch_dma;
+    
+};
 
-
-typedef struct
+struct arch_core
 {
 	arch_registers regs;
 	arch_alu alu;
 	void (*pipeline[CORE_STEPS])(arch_core*);
-} arch_core;
+};
 
 static volatile char ram[RAM_SIZE * 4] __attribute__((section("nberaki_ram")));
 

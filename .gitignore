@@ -1,2 +1,5 @@
 # system files
 .DS_Store
+
+# IDE and STK files
+.vscode/*
