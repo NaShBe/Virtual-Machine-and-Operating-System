@@ -1,3 +1,7 @@
+
+#include <stddef.h>		// for NULL
+#include <signal.h>		// for signal handling such as for abort
+#include <stdlib.h>		// for abort
 #include "architecture.h"
 #include "instructions.h"
 
@@ -10,13 +14,14 @@
 
 typedef struct 
 {
-	arch_word ac;
-	const arch_word zr;
-	arch_word gen_reg[14];
-	arch_addr pc;
-	instruction ir;
-	arch_word sp;
-} arch_registers;
+	arch_word ac;				/* accumulator */
+	const arch_word zr;			/* zero register */
+	arch_word gen_reg[10];		/* general-purpose registers */
+	arch_addr pc;				/* program counter */
+	instruction ir;				/* instruction register */
+	arch_addr sp;				/* stack pointer */
+	arch_addr bp;				/* base pointer */
+} arch_registers;		/* instructions provide access to 16 registers */
 
 typedef struct
 {
@@ -31,13 +36,8 @@ typedef struct
 	arch_word oprand1;
 	arch_word oprand2;
 	arch_word instr;
-	arch_addr output;
+	arch_word* output;
 } arch_alu;
-
-struct arch_dma
-{
-    
-};
 
 struct arch_core
 {
@@ -46,7 +46,34 @@ struct arch_core
 	void (*pipeline[CORE_STEPS])(arch_core*);
 };
 
+struct arch_dma
+{
+    arch_addr channel;
+	arch_word count;
+	arch_word intrpt;
+
+};
+
 static volatile char ram[RAM_SIZE * 4] __attribute__((section("nberaki_ram")));
+
+// externally available functions
+arch_core* init_core();
+void cycle(arch_core*);
+
+// interally available functions
+static inline void fetch(arch_core*);
+static void decode(arch_core*);
+static void inline no_op(arch_core*);
+static void read(arch_core*);
+static void write(arch_core*);
+static void store(arch_core*);
+static void load(arch_core*);
+static void arithm(arch_core*);
+static void jump(arch_core*);
+
+// helper functions
+static void help_write_to_mem(char*, unsigned int, arch_addr);
+static arch_word* help_get_reg(arch_core*, unsigned int);
 
 arch_core* init_core()
 {
@@ -64,7 +91,7 @@ void cycle(arch_core* core)
 
 static inline void fetch(arch_core* core)
 {
-	core->regs.ir.instr_data = core->regs.pc;
+	core->regs.ir.int_rep = *((arch_word*)&ram[core->regs.pc]);
 	core->regs.pc++;
 }
 
@@ -83,6 +110,7 @@ static void decode(arch_core* core)
 					core->alu.instr = core->regs.ir.opcode;
 					core->alu.oprand1 = ((arith_data)core->regs.ir.data).src1;
 					core->alu.oprand2 = ((arith_data)core->regs.ir.data).src2;
+					core->alu.output = help_get_reg(core, ((arith_data)core->regs.ir.data).dest);
 					core->pipeline[CORE_STEPS - 1] = arithm;
 					return;
 				default:
@@ -140,12 +168,25 @@ static void write(arch_core* core)
 
 static void store(arch_core* core)
 {
-
+	unsigned int eff_addr;
+	if (((cond_imm_data)core->regs.ir.data).dreg == 0) eff_addr = ((cond_imm_data)core->regs.ir.data).addr;
+	else eff_addr = ((cond_imm_data)core->regs.ir.data).dreg;
+	unsigned int eff_reg = ((cond_imm_data)core->regs.ir.data).breg;
+	arch_word* reg = help_get_reg(core, eff_reg);
+	eff_addr = *help_get_reg(core, eff_addr);
+	if (reg != NULL) help_write_to_mem(reg, sizeof(arch_word), eff_addr);
+	else abort();		//////TODOTODOTODO: signal handling, register not found
 }
 
 static void load(arch_core* core)
 {
-
+	unsigned int eff_addr;
+	if (((cond_imm_data)core->regs.ir.data).dreg == 0) eff_addr = ((cond_imm_data)core->regs.ir.data).addr;
+	else eff_addr = ((cond_imm_data)core->regs.ir.data).dreg;
+	eff_addr = *help_get_reg(core, eff_addr);
+	unsigned int eff_reg = ((cond_imm_data)core->regs.ir.data).breg;
+	if (eff_addr + 4 < RAM_SIZE*4-1) *help_get_reg(core, eff_reg) = ram[eff_addr];
+	else abort();		//TODOTODOTODOTODO: signal handling, RAM end reached
 }
 
 static void arithm(arch_core* core)
@@ -155,12 +196,61 @@ static void arithm(arch_core* core)
 		case MOV:
 			break;	//TODO
 		case ADD:
+			*core->alu.output = core->alu.oprand1 + core->alu.oprand2;
 			break;
 		case SUB:
+			*core->alu.output = core->alu.oprand1 - core->alu.oprand2;
 			break;
 		case MUL:
+			*core->alu.output = core->alu.oprand1 * core->alu.oprand2;
 			break;
 		case DIV:
+			if (core->alu.oprand2 !=0) *core->alu.output = core->alu.oprand1 / core->alu.oprand2;
+			else;	//TODOTODOTODOTODOTODOTODO: abort, signal handling dividing by zero; divide by zero interrupt handler; *output = 0xFFFFFFFF
 			break;
 	}
 }
+
+static void jump(arch_core* core)
+{
+	core->regs.pc = core->regs.ir.data;
+}
+
+/*		HELPER FUNCTIONS		*/
+
+static void help_write_to_mem(char* data, unsigned int size, arch_addr addr)
+{
+	char* offset = &(ram[addr]);
+	unsigned int count = 0;
+	while (offset <= &(ram[(RAM_SIZE * 4)-1]) && size < count)
+	{
+		*offset = data[count];
+		count++;
+		offset++;
+	}
+}
+
+static arch_word* help_get_reg(arch_core* core, unsigned int eff_reg)
+{
+	switch(eff_reg)
+	{
+		case 0:
+			return &core->regs.ac;
+		case 1:
+			return &core->regs.zr;
+		case 2 ... 11:
+			return &(core->regs.gen_reg[eff_reg - 2]);
+		case 12:
+			return &core->regs.pc;
+			break;
+		case 13:
+			return &core->regs.ir;
+			break;
+		case 14:
+			return &core->regs.sp;
+		case 15:
+			return &core->regs.bp;
+		default:
+			return NULL;
+	}
+};

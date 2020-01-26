@@ -6,10 +6,10 @@
 #define NULL 0
 // Format Defines
 // first two bits of instruction, determines type
-#define FORMAT_AIF  0x00	// Arithmatic format
-#define FORMAT_CBIF 0x01	//
-#define FORMAT_UJF 0x02		//
-#define FORMAT_IOIF 0x03	// I/O format
+#define FORMAT_AIF  0x00	// Arithmatic Instruction Format
+#define FORMAT_CBIF 0x01	// Conditional Branch & Immediate Instruction Format
+#define FORMAT_UJF 0x02		// Unconditional Jump Format
+#define FORMAT_IOIF 0x03	// I/O Instruction Format
 
 #define RD 0x00		// Load contents of input buffer into the accumulator
 #define WR 0x01		// Write the contents of accumulator into output buffer
@@ -39,12 +39,9 @@
 #define BGZ 0x19	// Branch to an address if
 #define BLZ 0x1A	// Branch to an address if
 
-#define GET_FORMAT(x) ((0xC0000000 & x) >> 30) 
-#define GET_OPCODE(x) ((0x3F000000 & x) >> 24)
-
 typedef union
 {
-	unsigned int instr_data;
+	unsigned int int_rep;
 	struct
 	{
 		unsigned int format: 2;
@@ -55,7 +52,7 @@ typedef union
 
 typedef union
 {
-	unsigned int data: 24;		// uint-compatable representation
+	unsigned int int_rep: 24;		// uint-compatable representation
 	struct
 	{
 		unsigned int src1: 4;	
@@ -67,7 +64,7 @@ typedef union
 
 typedef union
 {
-	unsigned int data: 24;		// uint-compatable representation
+	unsigned int int_rep: 24;		// uint-compatable representation
 	struct
 	{
 		unsigned int breg: 4;
@@ -78,14 +75,14 @@ typedef union
 
 typedef union
 {
-	unsigned int data: 24;		// uint-compatable representation
+	unsigned int int_rep: 24;		// uint-compatable representation
 	struct
 	{
 		unsigned int reg1: 4;
 		unsigned int reg2: 4;
 		unsigned int addr: 16;
 	};
-};
+} inp_out_data;
 
 
 #endif
