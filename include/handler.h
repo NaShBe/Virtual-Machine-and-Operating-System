@@ -12,6 +12,8 @@ typedef enum
 } error_type_enum;
 
 extern error_type_enum error_type;
-extern void signal_abort(error_type_enum, char*, int);  /* Don't call this directly, use send_error(<error_type>) */
+
+extern inline void init_error();
+extern void signal_abort(error_type_enum, char*, int);  /* Don't call this directly, use send_error(<error_type>) or call abort */
 
 #endif

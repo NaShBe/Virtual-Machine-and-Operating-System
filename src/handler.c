@@ -16,17 +16,22 @@ static char* error_filename = NULL;
 static char* error_line = NULL;
 static int error_intern_line = 0;
 
+inline void init_error();
 void signal_abort(error_type_enum, char*, int);
 static void abort_handle();
 static char* help_errorln_itoa(int);
 static void internal_error();
+
+extern inline void init_error()
+{
+    signal(SIGABRT, abort_handle);
+}
 
 void signal_abort(error_type_enum error, char* filename, int fileline)
 {
     error_type = error;
     error_filename = filename;
     error_line = help_errorln_itoa(fileline);
-    signal(SIGABRT, abort_handle);
     abort_handle();
 }
 
