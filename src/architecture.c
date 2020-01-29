@@ -1,9 +1,23 @@
+/*	=========================================
+ * architecture.c - implementation of the main VM architecture
+ * 
+ * this header should be used for documentation, but as for now it will hold temporary rules for the code:
+ * 		1) any errors created by the VM should abort the program
+ * 		2) any errors created directly or indirectly by VM user/programmer should perform error handling on the VM
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ *	========================================= 
+ */
+
 
 #include <stddef.h>		// for NULL
-#include <signal.h>		// for signal handling such as for abort
-#include <stdlib.h>		// for abort
 #include "architecture.h"
 #include "instructions.h"
+#include "handler.h"
 
 #define INTRPT_RESET 0x0
 #define INTRPT_UNDEFINED 0x1
@@ -175,7 +189,7 @@ static void store(arch_core* core)
 	arch_word* reg = help_get_reg(core, eff_reg);
 	eff_addr = *help_get_reg(core, eff_addr);
 	if (reg != NULL) help_write_to_mem(reg, sizeof(arch_word), eff_addr);
-	else abort();		//////TODOTODOTODO: signal handling, register not found
+	else send_error(reg_invalid);
 }
 
 static void load(arch_core* core)
@@ -183,10 +197,11 @@ static void load(arch_core* core)
 	unsigned int eff_addr;
 	if (((cond_imm_data)core->regs.ir.data).dreg == 0) eff_addr = ((cond_imm_data)core->regs.ir.data).addr;
 	else eff_addr = ((cond_imm_data)core->regs.ir.data).dreg;
-	eff_addr = *help_get_reg(core, eff_addr);
+	arch_word* temp = help_get_reg(core, eff_addr);
+	eff_addr = *temp;
 	unsigned int eff_reg = ((cond_imm_data)core->regs.ir.data).breg;
 	if (eff_addr + 4 < RAM_SIZE*4-1) *help_get_reg(core, eff_reg) = ram[eff_addr];
-	else abort();		//TODOTODOTODOTODO: signal handling, RAM end reached
+	else send_error(ram_outbounds);
 }
 
 static void arithm(arch_core* core)
@@ -194,6 +209,7 @@ static void arithm(arch_core* core)
 	switch(core->alu.instr)
 	{
 		case MOV:
+			*core->alu.output = core->alu.oprand2; //TODO: OR core->alu.operand1, read documentation
 			break;	//TODO
 		case ADD:
 			*core->alu.output = core->alu.oprand1 + core->alu.oprand2;
@@ -206,7 +222,7 @@ static void arithm(arch_core* core)
 			break;
 		case DIV:
 			if (core->alu.oprand2 !=0) *core->alu.output = core->alu.oprand1 / core->alu.oprand2;
-			else;	//TODOTODOTODOTODOTODOTODO: abort, signal handling dividing by zero; divide by zero interrupt handler; *output = 0xFFFFFFFF
+			else; //TODO: divide by zero interrupt
 			break;
 	}
 }
@@ -228,6 +244,7 @@ static void help_write_to_mem(char* data, unsigned int size, arch_addr addr)
 		count++;
 		offset++;
 	}
+	if (offset >= &(ram[(RAM_SIZE * 4)-1])) send_error(ram_outbounds);
 }
 
 static arch_word* help_get_reg(arch_core* core, unsigned int eff_reg)
@@ -251,6 +268,6 @@ static arch_word* help_get_reg(arch_core* core, unsigned int eff_reg)
 		case 15:
 			return &core->regs.bp;
 		default:
-			return NULL;
+			send_error(reg_invalid);
 	}
-};
+}
