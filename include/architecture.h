@@ -9,9 +9,6 @@
 #define INTRPT_OFF_RESET 0x0 /* Reset the computer */
 #define INTRPT_OFF_
 
-#include "instructions.h"
-#include "dma_controller.h"
-
 typedef unsigned int arch_word;
 typedef unsigned int arch_addr;
 
