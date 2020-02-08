@@ -9,7 +9,8 @@ typedef enum
     undefined = 0,
     ram_filled,
     ram_outbounds,
-    reg_invalid
+    reg_invalid,
+    disc_not_attached
 } error_type_enum;
 
 extern error_type_enum error_type;

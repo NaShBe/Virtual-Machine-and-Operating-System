@@ -1,4 +1,5 @@
 #include "architecture.h"
+#include "handler.h"
 #include <stdio.h> // to save/load hard drive 
 
 typedef struct
