@@ -1,7 +1,8 @@
-#ifndef NBERAKI_HANDLER_H
-#define NBERAKI_HANDLER_H
+#ifndef VMOS_HANDLER_H
+#define VMOS_HANDLER_H
 
 #define send_error(x) signal_abort(x, __FILE__, __LINE__)
+
 
 typedef enum
 {

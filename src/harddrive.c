@@ -6,7 +6,6 @@ typedef struct
     /* data */
 } arch_disk_controller;
 
-
 typedef struct
 {
     /* data */
@@ -25,7 +24,7 @@ typedef struct
             unsigned int no_conn: 1;
         };
     } status_reg;
-    char storage[DISK_SIZE * 4] __attribute__((section("nberaki_disk"))); 
+    char storage[DISK_SIZE * 4] __attribute__((section("vmos_disk"))); 
 } arch_disk;
 
 static arch_disk disk;

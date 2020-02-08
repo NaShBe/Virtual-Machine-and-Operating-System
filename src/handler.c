@@ -22,7 +22,7 @@ static void abort_handle();
 static char* help_errorln_itoa(int);
 static void internal_error();
 
-extern inline void init_error()
+inline void init_error()
 {
     signal(SIGABRT, abort_handle);
 }

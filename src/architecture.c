@@ -2,8 +2,8 @@
  * architecture.c - implementation of the main VM architecture
  * 
  * this header should be used for documentation, but as for now it will hold temporary rules for the code:
- * 		1) any errors created by the VM should abort the program
- * 		2) any errors created directly or indirectly by VM user/programmer should perform error handling on the VM
+ * 		1) any VM system errors or C program errors should abort the program
+ * 		2) any errors created directly by VM user/programmer or VM programs should invoke VM system error handling (e.g. interrupts)
  * 
  * 
  * 
@@ -68,7 +68,7 @@ struct arch_dma
 
 };
 
-static volatile char ram[RAM_SIZE * 4] __attribute__((section("nberaki_ram")));
+static volatile char ram[RAM_SIZE * 4] __attribute__((section("vmos_ram")));
 
 // externally available functions
 arch_core* init_core();
