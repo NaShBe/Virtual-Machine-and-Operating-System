@@ -1,13 +1,13 @@
 #ifndef VMOS_ARCH_H
 #define VMOS_ARCH_H
 
+#ifndef RAM_SIZE
 #define RAM_SIZE 1024
-#define DISK_SIZE 2048
+#endif
 
-/* Interrupt Vector Address and Interrupt Offsets*/
-#define INTRPT_TABLE 0x0 /* interrupt vector starts at 0x0*/
-#define INTRPT_OFF_RESET 0x0 /* Reset the computer */
-#define INTRPT_OFF_
+#ifndef DISK_SIZE
+#define DISK_SIZE 2048
+#endif
 
 typedef unsigned int arch_word;
 typedef unsigned int arch_addr;

@@ -3,7 +3,7 @@
  * 
  * this header should be used for documentation, but as for now it will hold temporary rules for the code:
  * 		1) any VM system errors or C program errors should abort the program
- * 		2) any errors created directly by VM user/programmer or VM programs should invoke VM system error handling (e.g. interrupts)
+ * 		2) any errors created directly by VM user/programmer or VM programs should invoke VM system error handling (i.e. interrupts)
  * 
  * 
  * 
@@ -15,12 +15,19 @@
 
 
 #include <stddef.h>		// for NULL
+#include <stdlib.h>		// for malloc
 #include "architecture.h"
 #include "instructions.h"
 #include "handler.h"
 
-#define INTRPT_RESET 0x0
-#define INTRPT_UNDEFINED 0x1
+/* Interrupt Vector Address and Interrupt Offsets*/
+#define INTRPT_TABLE 0x0 /* interrupt vector starts at 0x0*/
+#define INTRPT_SIZE 0x10 /* interrupt vector size */
+
+#define INTRPT_OFF_RESET INTRPT_TABLE + 0x0 /* Reset the computer */
+#define INTRPT_OFF_UNDEF INTRPT_TABLE + 0x4 /* Undefined instruction */
+#define INTRPT_OFF_MATH INTRPT_TABLE + 0x8 /* Mathematical issue (DIV by 0) */
+#define INTRPT_OFF_SOFT INTRPT_TABLE + 0xC /* Software interrupt for operating system */
 
 #define CORE_PARALLEL FALSE		// This establishes if instruction pipelining happens.
 #define CORE_STEPS 3		// This is how many steps are taken to complete one CPU instruction (fetching, decoding, executing)
@@ -29,13 +36,13 @@
 typedef struct 
 {
 	arch_word ac;				/* accumulator */
-	const arch_word zr;			/* zero register */
+	arch_word zr;			/* zero register */
 	arch_word gen_reg[10];		/* general-purpose registers */
 	arch_addr pc;				/* program counter */
-	instruction ir;				/* instruction register */
+	arch_instr ir;				/* instruction register */
 	arch_addr sp;				/* stack pointer */
 	arch_addr bp;				/* base pointer */
-} arch_registers;		/* instructions provide access to 16 registers */
+} arch_registers;		/* instructions provide access to the CPU's 16 registers */
 
 typedef struct
 {
@@ -53,22 +60,23 @@ typedef struct
 	arch_word* output;
 } arch_alu;
 
-struct arch_core
+typedef struct arch_core
 {
 	arch_registers regs;
 	arch_alu alu;
 	void (*pipeline[CORE_STEPS])(arch_core*);
-};
+	arch_word cycle_count;
+} arch_core;
 
-struct arch_dma
+typedef struct arch_dma
 {
     arch_addr channel;
 	arch_word count;
 	arch_word intrpt;
 
-};
+} arch_dma;
 
-static volatile char ram[RAM_SIZE * 4] __attribute__((section("vmos_ram")));
+static volatile char ram[RAM_SIZE * 4] /* __attribute__((section("vmos_ram"))) */;
 
 // externally available functions
 arch_core* init_core();
@@ -91,15 +99,34 @@ static arch_word* help_get_reg(arch_core*, unsigned int);
 
 arch_core* init_core()
 {
-	static arch_core core = {.regs = {0}, .pipeline = {fetch, decode, no_op}};
+	arch_core* core = malloc(sizeof(arch_core));
+	if (core == NULL) send_error(bad_malloc);
+	*core = (struct arch_core){.regs = {0}, .pipeline = {fetch, decode, no_op}};
+	if ((sizeof(core->pipeline)/sizeof(core->pipeline[0]) != CORE_STEPS)) send_error(core_pipeline_corruption);
+	core->cycle_count = 0;
 	return &core;
 }
 
 void cycle(arch_core* core)
 {
-	for (unsigned int i = 0; i < CORE_STEPS; i++)
+	if (CORE_PARALLEL)
 	{
-		core->pipeline[i](core);
+		if (core->cycle_count >= CORE_STEPS) core->cycle_count = CORE_STEPS-1;
+		for(unsigned int i = core->cycle_count; i < CORE_STEPS; i++)
+		{
+			for(unsigned int j = i; j >= 0; j--)
+			{
+				core->pipeline[j](core);
+			}
+		}
+		core->cycle_count++;
+	}
+	else
+	{
+		for (unsigned int i = 0; i < CORE_STEPS; i++)
+		{
+			core->pipeline[i](core);
+		}
 	}
 }
 

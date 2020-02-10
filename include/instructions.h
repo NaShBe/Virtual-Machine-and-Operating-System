@@ -48,7 +48,7 @@ typedef union
 		unsigned int opcode: 6;
 		unsigned int data: 24;
 	};
-}instruction;
+}arch_instr;
 
 typedef union
 {
