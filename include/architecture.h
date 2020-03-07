@@ -1,3 +1,5 @@
+#include <pthread.h>	// pthread_t needed for definition of arch_core
+
 #ifndef VMOS_ARCH_H
 #define VMOS_ARCH_H
 
@@ -82,11 +84,13 @@ typedef struct
 
 typedef struct
 {
+	arch_uint		id;
 	arch_registers  regs;
 	arch_alu        alu;
 	arch_pipe_func	pipeline[CORE_STEPS];
 	arch_word       cycle_count;
 	arch_bool       is_enabled_intrpt;
+	pthread_t		thread;
 } arch_core;
 
 typedef struct

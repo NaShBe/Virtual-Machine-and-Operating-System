@@ -34,6 +34,7 @@ void      	cycle				(arch_core**, arch_uint);
 
 
 // interally available functions
+static void step		(arch_core*);
 static void fetch		(arch_core*);
 static void decode		(arch_core*);
 static void no_op		(arch_core*);
@@ -94,6 +95,15 @@ void cycle(arch_core** core_list, arch_uint core_list_size)
 	for (arch_int i = 0; i < core_list_size; i++)
 	{
 		arch_core* core = core_list[i];
+		pthread_create(&core->thread, NULL, step, core);
+		pthread_join(&core->thread, NULL);
+	}
+}
+
+void step (arch_core* core)
+{
+	do
+	{
 		if (CORE_PARALLEL)
 		{
 			if (core->cycle_count >= CORE_STEPS) core->cycle_count = CORE_STEPS-1;
@@ -113,7 +123,7 @@ void cycle(arch_core** core_list, arch_uint core_list_size)
 				core->pipeline[i](core);
 			}
 		}
-	}
+	} while ((core->pipeline[CORE_EXE_STEP] != halt) || core->id == 0);
 }
 
 static void fetch(arch_core* core)
