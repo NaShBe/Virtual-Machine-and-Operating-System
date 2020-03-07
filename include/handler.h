@@ -7,6 +7,8 @@
 typedef enum
 {
     undefined = 0,
+    bad_malloc,
+    core_pipeline_corruption,
     ram_filled,
     ram_outbounds,
     reg_invalid,

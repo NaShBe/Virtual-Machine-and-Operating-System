@@ -52,6 +52,9 @@ static void abort_handle()
 
     switch(error_type)
     {
+        case core_pipeline_corruption:
+            fprintf(stderr, "Pipeline corrupted, aborting...\n%s: %s", error_filename, error_line);
+            break;
         case ram_filled:
             fprintf(stderr, "RAM filled, aborting...\n%s: %s", error_filename, error_line);
             break;

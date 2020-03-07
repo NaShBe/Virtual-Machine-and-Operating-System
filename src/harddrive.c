@@ -1,6 +1,7 @@
 #include "architecture.h"
 #include "handler.h"
 #include <stdio.h> // to save/load hard drive 
+#include <stdbool.h>
 
 typedef struct
 {
@@ -19,29 +20,29 @@ typedef struct
         arch_word data;
         struct
         {
-            unsigned int power: 1;
-            unsigned int full: 1;
-            unsigned int empty: 1;
-            unsigned int no_conn: 1;
+            arch_word power:   1;
+            arch_word full:    1;
+            arch_word empty:   1;
+            arch_word no_conn: 1;
+            arch_word reading: 1;
+            arch_word writing: 1;
         };
     } status_reg;
-    char storage[DISK_SIZE * 4] __attribute__((section("vmos_disk"))); 
+    char storage[DISK_SIZE * 4]; 
 } arch_disk;
 
-static arch_disk disk;
-
-void access_disk(arch_dma* disk_dma)
+void access_disk(const char* path)
 {
-    while(disk.status_reg.power)
-    {
-        if (disk_dma == NULL)
-        {
-
-        }
-        else
-        {
-            
-        }
-        
-    }
+    FILE* disk_file = NULL;
 }
+
+bool write_to_disk(arch_disk* disk, const char* filename)
+{
+    return false;
+}
+
+bool write_to_disk(arch_disk* disk, FILE* file)
+{
+    return false;
+}
+
