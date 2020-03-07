@@ -12,7 +12,7 @@ typedef enum
     ram_filled,
     ram_outbounds,
     reg_invalid,
-    disc_not_attached,
+    disc_not_attached
 } error_type_enum;
 
 extern error_type_enum error_type;
