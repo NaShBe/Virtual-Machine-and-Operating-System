@@ -1,3 +1,4 @@
+#include "instructions.h" // arch_instr needed for definition in arch_core
 #include <pthread.h>	// pthread_t needed for definition of arch_core
 
 #ifndef VMOS_ARCH_H
@@ -58,7 +59,7 @@ typedef struct
 {
 	arch_word   ac;				/* accumulator */
 	arch_word   zr;			    /* zero register */
-	arch_word   gen_reg[10];		/* general-purpose registers */
+	arch_word   gen_reg[10];	/* general-purpose registers */
 	arch_addr   pc;				/* program counter */
 	arch_instr  ir;				/* instruction register */
 	arch_addr   sp;				/* stack pointer */
@@ -105,9 +106,16 @@ typedef struct
 typedef struct
 {
 	arch_dma_registers* registers;
-	arch_addr*          devices;
-	arch_word           size;
+	arch_device**       devices;
+	const arch_word    	size;
+	arch_bool*			bus_access;
 } arch_dma;
+
+typedef struct
+{
+	arch_addr address;
+	arch_addr* access;
+} arch_device;
 
 extern volatile arch_byte core_ram[RAM_SIZE * ARCH_WORD_SIZE];
 
@@ -115,6 +123,6 @@ extern arch_core*   init_core_default   ();                         /* will init
 extern arch_core*   init_core   		(arch_registers*, arch_pipe_func*, arch_addr);
 extern void         cycle       		(arch_core**, arch_uint);   /* will cycles through every core in the list */
 extern void         thread      		(arch_core*, arch_addr);    /* will jump core into process entry point*/
-extern arch_addr    connect_dma 		(void(*)(arch_dma*));
+extern arch_addr    connect_dma 		(arch_device*);
 
 #endif /* architecture.h */

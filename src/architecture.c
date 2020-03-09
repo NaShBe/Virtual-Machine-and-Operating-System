@@ -24,6 +24,7 @@
 volatile arch_byte	arch_ram[RAM_SIZE * ARCH_WORD_SIZE];
 static arch_dma		core_dma_cont;
 static arch_uint	core_amount;
+static arch_bool	has_bus_control;
 static const arch_interrupt_table const* intrpt_vector = &arch_ram + INTRPT_OFFSET;
 
 
@@ -31,6 +32,8 @@ static const arch_interrupt_table const* intrpt_vector = &arch_ram + INTRPT_OFFS
 arch_core*	init_core_default   ();
 arch_core*	init_core   		(arch_registers*, arch_pipe_func*, arch_addr);
 void      	cycle				(arch_core**, arch_uint);
+void		thread				(arch_core*, arch_addr);
+arch_addr	connect_dma			(arch_device*);
 
 
 // interally available functions
@@ -98,6 +101,16 @@ void cycle(arch_core** core_list, arch_uint core_list_size)
 		pthread_create(&core->thread, NULL, step, core);
 		pthread_join(&core->thread, NULL);
 	}
+}
+
+void thread(arch_core* core, arch_addr entry)
+{
+
+}
+
+arch_addr connect_dma(arch_device* device)
+{
+	
 }
 
 void step (arch_core* core)
@@ -332,7 +345,7 @@ static void arithm(arch_core* core)
 
 static void mov_imm(arch_core* core)
 {
-
+	
 }
 
 static void add_imm(arch_core* core)

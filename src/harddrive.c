@@ -28,7 +28,7 @@ typedef struct
             arch_word writing: 1;
         };
     } status_reg;
-    char storage[DISK_SIZE * 4]; 
+    arch_byte storage[DISK_SIZE * 4]; 
 } arch_disk;
 
 void access_disk(const char* path)
