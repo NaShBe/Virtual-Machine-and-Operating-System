@@ -5,11 +5,11 @@
 #define VMOS_ARCH_H
 
 #ifndef RAM_SIZE
-#define RAM_SIZE 1024
+#define RAM_SIZE	1024
 #endif
 
 #ifndef DISK_SIZE
-#define DISK_SIZE 2048
+#define DISK_SIZE	2048
 #endif
 
 #define ARCH_BYTE_SIZE sizeof(unsigned char)
@@ -107,6 +107,7 @@ typedef struct
 {
 	arch_dma_registers* registers;
 	arch_device**       devices;
+	arch_addr			active_device;
 	const arch_word    	size;
 	arch_bool*			bus_access;
 } arch_dma;
@@ -123,6 +124,6 @@ extern arch_core*   init_core_default   ();                         /* will init
 extern arch_core*   init_core   		(arch_registers*, arch_pipe_func*, arch_addr);
 extern void         cycle       		(arch_core**, arch_uint);   /* will cycles through every core in the list */
 extern void         thread      		(arch_core*, arch_addr);    /* will jump core into process entry point*/
-extern arch_addr    connect_dma 		(arch_device*);
+extern arch_addr    connect_dma 		(arch_device*);				/* connects a device and provides the address for programming */
 
 #endif /* architecture.h */
