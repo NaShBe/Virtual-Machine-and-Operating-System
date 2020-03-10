@@ -52,6 +52,9 @@ static void abort_handle()
 
     switch(error_type)
     {
+        case bad_malloc:
+            fprintf(stderr, "important data memory not allocated, aborting...\n%s: %s", error_filename, error_line);
+            break;
         case core_pipeline_corruption:
             fprintf(stderr, "Pipeline corrupted, aborting...\n%s: %s", error_filename, error_line);
             break;
@@ -63,6 +66,12 @@ static void abort_handle()
             break;
         case reg_invalid:
             fprintf(stderr, "Invalid register input/register not available, aborting...\n%s: %s", error_filename, error_line);
+            break;
+        case disc_not_attached:
+            fprintf(stderr, "No storage device attached, aborting...\n%s: %s", error_filename, error_line);
+            break;
+        case disc_corruption:
+            fprintf(stderr, "Disc data corrupted and cannot be read, aborting...\n%s: %s", error_filename, error_line);
             break;
         default:
             fprintf(stderr, "Unspecified error, aborting....\n%s: %s");

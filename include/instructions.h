@@ -35,6 +35,7 @@
 #define BNZ  0x18	// Branch to an address if
 #define BGZ  0x19	// Branch to an address if
 #define BLZ  0x1A	// Branch to an address if
+#define SWE  0x1B	// Software Interrupt
 
 typedef union
 {
