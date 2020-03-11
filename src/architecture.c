@@ -380,15 +380,7 @@ static void div_imm(arch_core* core)
 
 static void load_imm(arch_core* core)
 {
-	arch_uint eff_data;
-	if (((cond_imm_data)core->regs.ir.data).dreg == 0)
-	{
-		eff_data = ((cond_imm_data)core->regs.ir.data).addr;
-	}
-	else
-	{
-		eff_data = ((cond_imm_data)core->regs.ir.data).dreg;
-	}
+	arch_uint eff_data = ((cond_imm_data)core->regs.ir.data).addr;
   	arch_uint eff_reg = ((cond_imm_data)core->regs.ir.data).breg; 
   	*help_get_reg(core, eff_reg) = eff_data;
 }
