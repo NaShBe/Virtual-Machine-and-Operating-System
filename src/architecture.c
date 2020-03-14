@@ -18,7 +18,7 @@
 #include "handler.h"
 #include <stddef.h>		/* for NULL */
 #include <stdlib.h>		/* for malloc */
-//include <pthread.h>	/* for threading of core and DMA processes */
+#include <pthread.h>	/* for threading of core and DMA processes */
 
 
 volatile arch_byte	arch_ram[RAM_SIZE * ARCH_WORD_SIZE];
@@ -399,7 +399,7 @@ static void set_less_imm(arch_core* core)
   	arch_uint eff_reg = ((cond_imm_data)core->regs.ir.data).breg;
 	if(((arith_data)core->regs.ir.data).src1 < ((arith_data)core->regs.ir.data).breg) 
 	{
-		*help_get_reg(core, eff_addr).dreg = core->reg.zr + 1;
+		*help_get_reg(core, eff_addr).dreg = core=>reg.zr.data + 1;
 	} 
 	else
 	{
@@ -409,7 +409,7 @@ static void set_less_imm(arch_core* core)
 
 static void halt(arch_core* core)
 {
-	core->regs.ac = core->regs.ir.data;
+	core->regs.ac.data = core->(regs.ir.data);
 }
 
 static void jump(arch_core* core)
