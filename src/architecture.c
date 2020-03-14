@@ -437,7 +437,7 @@ static void branch(arch_core* core)
 				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
 				core->regs.pc = jmp_addr;
 			}
-			else {return;} //do nothing
+			else {return;} 
 			break;
 		case BEZ:
 			if (((cond_imm_data)core->regs.ir.data).breg == core->regs.zr)
@@ -445,7 +445,7 @@ static void branch(arch_core* core)
 				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
 				core->regs.pc = jmp_addr;
 			}
-			else {return;} //do nothing
+			else {return;} 
 
 			break;
 		case BNZ:
@@ -454,7 +454,7 @@ static void branch(arch_core* core)
 				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
 				core->regs.pc = jmp_addr;
 			}
-			else {return;} //do nothing
+			else {return;} 
 			break;
 		case BGZ:
 			if (((cond_imm_data)core->regs.ir.data).breg > core->regs.zr)
@@ -462,7 +462,7 @@ static void branch(arch_core* core)
 				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
 				core->regs.pc = jmp_addr;
 			}
-			else {return;} //do nothing
+			else {return;} 
 			break;
 		case BLZ:
 			if (((cond_imm_data)core->regs.ir.data).breg < core->regs.zr)
@@ -470,7 +470,7 @@ static void branch(arch_core* core)
 				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
 				core->regs.pc = jmp_addr;
 			}
-			else {return;} //do nothing
+			else {return;} 
 			break;
 	}
 }
