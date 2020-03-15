@@ -1,31 +1,12 @@
+#include "harddrive.h"
 #include "architecture.h"
 #include "handler.h"
 #include <stddef.h> // for NULL
-#include <stdio.h>  // to save/load hard drive
+#include <stdio.h>  // for I/O
 #include <stdlib.h> // for malloc()
 
-typedef struct
-{
-    /* data */
-} arch_disk_controller;
-
-typedef struct
-{
-    /* data */
-} arch_partition_table;
-
-typedef struct
-{
-    arch_byte   storage[DISK_SIZE * 4];
-    arch_device device;
-} arch_drive;
-
-typedef struct
-{
-    arch_byte*  data;
-    arch_uint   size;
-} drive_file;
-
+static arch_file_meta* file_list;
+static FILE* input_file;
 
 arch_device* access_drive(const char* path)
 {
@@ -35,7 +16,18 @@ arch_device* access_drive(const char* path)
     {
         send_error(disc_not_attached);
     }
+
+    //scan
+    if ( 1) // compare scan and see if it is harddrive type
+    {
+
+    }
     drive_file* full_file = malloc(sizeof(drive_file));
+}
+
+drive_file* get_file_data(arch_file_meta* file)
+{
+    
 }
 
 arch_bool write_to_disc(arch_drive* drive, const char* filename)
