@@ -180,21 +180,51 @@ static void decode(arch_core* core)
 					core->pipeline[CORE_EXE_STEP] = load;
 					return;
 				case MOVI:
+					if (((cond_imm_data)core->regs.ir.data).dreg != 0)
+ 					{
+						core->regs.pc = INTRPT_OFF_UNDEF;
+						core->pipeline[CORE_EXE_STEP] = interrupt;
+					}
 					core->pipeline[CORE_EXE_STEP] = mov_imm;
 					return;
 				case ADDI:
+					if (((cond_imm_data)core->regs.ir.data).dreg != 0)
+ 					{
+						core->regs.pc = INTRPT_OFF_UNDEF;
+						core->pipeline[CORE_EXE_STEP] = interrupt;
+					}
 					core->pipeline[CORE_EXE_STEP] = add_imm;
 					return;
 				case MULI:
+					if (((cond_imm_data)core->regs.ir.data).dreg != 0)
+ 					{
+						core->regs.pc = INTRPT_OFF_UNDEF;
+						core->pipeline[CORE_EXE_STEP] = interrupt;
+					}
 					core->pipeline[CORE_EXE_STEP] = mul_imm;
 					return;
 				case DIVI:
+					if (((cond_imm_data)core->regs.ir.data).dreg != 0)
+ 					{
+						core->regs.pc = INTRPT_OFF_UNDEF;
+						core->pipeline[CORE_EXE_STEP] = interrupt;
+					}
 					core->pipeline[CORE_EXE_STEP] = div_imm;
 					return;
 				case LDI:
+					if (((cond_imm_data)core->regs.ir.data).dreg != 0)
+ 					{
+						core->regs.pc = INTRPT_OFF_UNDEF;
+						core->pipeline[CORE_EXE_STEP] = interrupt;
+					}
 					core->pipeline[CORE_EXE_STEP] = load_imm;
 					return;
 				case SLTI:
+					if (((cond_imm_data)core->regs.ir.data).dreg != 0)
+ 					{
+						core->regs.pc = INTRPT_OFF_UNDEF;
+						core->pipeline[CORE_EXE_STEP] = interrupt;
+					}
 					core->pipeline[CORE_EXE_STEP] = set_less_imm;
 					return;
 				case BEQ: case BNE: case BEZ: case BNZ: case BGZ: case BLZ:
@@ -355,37 +385,56 @@ static void arithm(arch_core* core)
 
 static void mov_imm(arch_core* core)
 {
-	
+	arch_uint eff_data = ((cond_imm_data)core->regs.ir.data).addr;
+  arch_uint eff_reg = ((cond_imm_data)core->regs.ir.data).breg;
+  *help_get_reg(core, eff_reg) = eff_data;
 }
 
 static void add_imm(arch_core* core)
 {
-	
+	arch_uint eff_data = ((cond_imm_data)core->regs.ir.data).addr;
+	arch_uint eff_reg = ((cond_imm_data)core->regs.ir.data).breg;
+	*help_get_reg(core, eff_reg) += eff_data;
 }
 
 static void mul_imm(arch_core* core)
 {
-
+	arch_uint eff_data = ((cond_imm_data)core->regs.ir.data).addr;
+	arch_uint eff_reg = ((cond_imm_data)core->regs.ir.data).breg;
+  	*help_get_reg(core, eff_reg) = *help_get_reg(core, eff_reg) * eff_data;
 }
 
 static void div_imm(arch_core* core)
 {
-
+	arch_uint eff_data = ((cond_imm_data)core->regs.ir.data).addr;
+	arch_uint eff_reg = ((cond_imm_data)core->regs.ir.data).breg;
+  	*help_get_reg(core, eff_reg) = *help_get_reg(core, eff_reg) / eff_data;
 }
 
 static void load_imm(arch_core* core)
 {
-
+	arch_uint eff_data = ((cond_imm_data)core->regs.ir.data).addr;
+  	arch_uint eff_reg = ((cond_imm_data)core->regs.ir.data).breg; 
+  	*help_get_reg(core, eff_reg) = eff_data;
 }
 
 static void set_less_imm(arch_core* core)
 {
-
+	arch_uint eff_data = ((cond_imm_data)core->regs.ir.data).addr;
+  	arch_uint eff_reg = ((cond_imm_data)core->regs.ir.data).breg;
+	if(((arith_data)core->regs.ir.data).src1 < ((arith_data)core->regs.ir.data).breg) 
+	{
+		*help_get_reg(core, eff_addr).dreg = core=>reg.zr.data + 1;
+	} 
+	else
+	{
+		*help_get_reg(core, eff_addr).dreg = core=>reg.zr.data;
+	}
 }
 
 static void halt(arch_core* core)
 {
-
+	core->regs.ac.data = core->(regs.ir.data);
 }
 
 static void jump(arch_core* core)
@@ -395,19 +444,58 @@ static void jump(arch_core* core)
 
 static void branch(arch_core* core)
 {
+	arch_addr jmp_addr;
 	switch (core->regs.ir.opcode)
 	{
 		case BEQ:
+			if (((cond_imm_data)core->regs.ir.data).breg == ((cond_imm_data)core->regs.ir.data).dreg)
+			{
+				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
+				core->regs.pc = jmp_addr;
+				return;
+			}
+			else {return;} 
 			break;
 		case BNE:
+			if (((cond_imm_data)core->regs.ir.data).breg != ((cond_imm_data)core->regs.ir.data).dreg)
+			{
+				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
+				core->regs.pc = jmp_addr;
+			}
+			else {return;} 
 			break;
 		case BEZ:
+			if (((cond_imm_data)core->regs.ir.data).breg == core->regs.zr)
+			{
+				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
+				core->regs.pc = jmp_addr;
+			}
+			else {return;} 
+
 			break;
 		case BNZ:
+			if (((cond_imm_data)core->regs.ir.data).breg != core->regs.zr)
+			{
+				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
+				core->regs.pc = jmp_addr;
+			}
+			else {return;} 
 			break;
 		case BGZ:
+			if (((cond_imm_data)core->regs.ir.data).breg > core->regs.zr)
+			{
+				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
+				core->regs.pc = jmp_addr;
+			}
+			else {return;} 
 			break;
 		case BLZ:
+			if (((cond_imm_data)core->regs.ir.data).breg < core->regs.zr)
+			{
+				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
+				core->regs.pc = jmp_addr;
+			}
+			else {return;} 
 			break;
 	}
 }
