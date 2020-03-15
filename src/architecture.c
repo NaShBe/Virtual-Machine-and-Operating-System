@@ -21,19 +21,23 @@
 #include <pthread.h>	/* for threading of core and DMA processes */
 
 
-volatile arch_byte	arch_ram[RAM_SIZE * ARCH_WORD_SIZE];
+volatile arch_byte	arch_memory[RAM_SIZE * ARCH_WORD_SIZE];
 static arch_dma		core_dma_cont;
 static arch_uint	core_amount;
-static const arch_interrupt_table const* intrpt_vector = &arch_ram + INTRPT_OFFSET;
+static arch_bool	has_bus_control;
+static const arch_interrupt_table const* intrpt_vector = &arch_memory + INTRPT_OFFSET;
 
 
 // externally available functions
 arch_core*	init_core_default   ();
 arch_core*	init_core   		(arch_registers*, arch_pipe_func*, arch_addr);
 void      	cycle				(arch_core**, arch_uint);
+void		thread				(arch_core*, arch_addr);
+arch_addr	connect_dma			(arch_device*);
 
 
 // interally available functions
+static void step		(arch_core*);
 static void fetch		(arch_core*);
 static void decode		(arch_core*);
 static void no_op		(arch_core*);
@@ -53,7 +57,6 @@ static void jump		(arch_core*);
 static void branch		(arch_core*);
 static void interrupt	(arch_core*);
 
-
 // helper functions
 static void       	help_write_to_mem	(arch_byte*, arch_uint, arch_addr);
 static arch_byte*	help_get_ram_addr	(arch_addr);
@@ -69,7 +72,7 @@ arch_core* init_core_default()
 		send_error(bad_malloc);
 	}
 	*core = (arch_core){.regs = {0}, .pipeline = {fetch, decode, no_op}};
-	core->regs.pc = &arch_ram;
+	core->regs.pc = &arch_memory;
 	core->cycle_count = 0;
 	core_amount++;
 	return core;
@@ -83,7 +86,7 @@ arch_core* init_core(arch_registers* regs_init, arch_pipe_func* pipeline, arch_a
 		send_error(bad_malloc);
 	}
 	*core = (arch_core){.regs = *regs_init, .pipeline = pipeline};
-	core->regs.pc = &arch_ram + entry_point;
+	core->regs.pc = &arch_memory + entry_point;
 	core->cycle_count = 0;
 	core_amount++;
 	return core;
@@ -94,6 +97,25 @@ void cycle(arch_core** core_list, arch_uint core_list_size)
 	for (arch_int i = 0; i < core_list_size; i++)
 	{
 		arch_core* core = core_list[i];
+		pthread_create(&core->thread, NULL, step, core);
+		pthread_join(&core->thread, NULL);
+	}
+}
+
+void thread(arch_core* core, arch_addr entry)
+{
+
+}
+
+arch_addr connect_dma(arch_device* device)
+{
+	
+}
+
+void step (arch_core* core)
+{
+	do
+	{
 		if (CORE_PARALLEL)
 		{
 			if (core->cycle_count >= CORE_STEPS) core->cycle_count = CORE_STEPS-1;
@@ -113,12 +135,12 @@ void cycle(arch_core** core_list, arch_uint core_list_size)
 				core->pipeline[i](core);
 			}
 		}
-	}
+	} while ((core->pipeline[CORE_EXE_STEP] != halt) || core->id == 0);
 }
 
 static void fetch(arch_core* core)
 {
-	core->regs.ir.int_rep = *((arch_word*)&arch_ram[core->regs.pc]);
+	core->regs.ir.int_rep = *((arch_word*)&arch_memory[core->regs.pc]);
 	core->regs.pc++;
 }
 
@@ -224,7 +246,16 @@ static void decode(arch_core* core)
 				case JMP:
 					core->pipeline[CORE_EXE_STEP] = jump;
 					return;
+				case SWE:
+					help_push(core->regs.pc, core);
+					core->regs.pc = INTRPT_OFF_SOFT;
+					core->pipeline[CORE_EXE_STEP] = interrupt;
+					return;
+				case NOP:
+					core->pipeline[CORE_EXE_STEP] = no_op;
+					return;
 				default:
+					help_push(core->regs.pc, core);
 					core->regs.pc = INTRPT_OFF_UNDEF;
 					core->pipeline[CORE_EXE_STEP] = interrupt;
 					return;
@@ -240,12 +271,14 @@ static void decode(arch_core* core)
 					core->pipeline[CORE_EXE_STEP] = write;
 					return;
 				default:
+					help_push(core->regs.pc, core);
 					core->regs.pc = INTRPT_OFF_UNDEF;
 					core->pipeline[CORE_EXE_STEP] = interrupt;
 					return;
 			}
 			return;
 		default:
+			help_push(core->regs.pc, core);
 			core->regs.pc = INTRPT_OFF_UNDEF;
 			core->pipeline[CORE_EXE_STEP] = interrupt;
 			return;
@@ -310,7 +343,7 @@ static void load(arch_core* core)
 	arch_uint eff_reg = ((cond_imm_data)core->regs.ir.data).breg;
 	if (eff_addr + 4 < RAM_SIZE*4-1)
 	{
-		*help_get_reg(core, eff_reg) = arch_ram[eff_addr];
+		*help_get_reg(core, eff_reg) = arch_memory[eff_addr];
 	}
 	else
 	{
@@ -353,8 +386,8 @@ static void arithm(arch_core* core)
 static void mov_imm(arch_core* core)
 {
 	arch_uint eff_data = ((cond_imm_data)core->regs.ir.data).addr;
-  	arch_uint eff_reg = ((cond_imm_data)core->regs.ir.data).breg;
-  	*help_get_reg(core, eff_reg) = eff_data;
+  arch_uint eff_reg = ((cond_imm_data)core->regs.ir.data).breg;
+  *help_get_reg(core, eff_reg) = eff_data;
 }
 
 static void add_imm(arch_core* core)
@@ -469,24 +502,23 @@ static void branch(arch_core* core)
 
 static void interrupt(arch_core* core)
 {
-	help_push(core->regs.pc, core);
 }
 
 /*		HELPER FUNCTIONS		*/
 
 static void help_write_to_mem(arch_byte* data, arch_uint size, arch_addr addr)
 {
-	arch_byte* offset = &(arch_ram[addr]);
+	arch_byte* offset = &(arch_memory[addr]);
 	arch_uint count = 0;
 
-	while (offset <= &(arch_ram[(RAM_SIZE * ARCH_WORD_SIZE)-1]) && size < count)
+	while (offset <= &(arch_memory[(RAM_SIZE * ARCH_WORD_SIZE)-1]) && size < count)
 	{
 		*offset = data[count];
 		count++;
 		offset++;
 	}
 
-	if (offset >= &(arch_ram[(RAM_SIZE * ARCH_WORD_SIZE)-1]))
+	if (offset >= &(arch_memory[(RAM_SIZE * ARCH_WORD_SIZE)-1]))
 	{
 		send_error(ram_outbounds);
 	}
@@ -522,24 +554,24 @@ static arch_word* help_get_reg(arch_core* core, arch_uint eff_reg)
 
 static arch_byte* help_get_ram_addr(arch_addr address)
 {
-	return (arch_byte*)&arch_ram + address;
+	return (arch_byte*)&arch_memory + address;
 }
 
 static void help_push(arch_word value, arch_core* core)
 {
-	arch_byte* temp = (arch_byte*)(&arch_ram + core->regs.sp);
+	arch_byte* temp = (arch_byte*)(&arch_memory + core->regs.sp);
 	*(arch_word*)temp = value;
 	core->regs.sp += ARCH_WORD_SIZE;
 }
 
 static void help_pop(arch_core* core)
 {
-	arch_word* temp = (arch_word*)((arch_byte*)&arch_ram + core->regs.sp);
+	arch_word* temp = (arch_word*)((arch_byte*)&arch_memory + core->regs.sp);
 	core->regs.ac = *temp;
 	core->regs.sp -= ARCH_WORD_SIZE;
 	if (core->regs.sp == core->regs.bp)
 	{
-		core->regs.bp = *(&arch_ram + core->regs.bp);
+		core->regs.bp = *(&arch_memory + core->regs.bp);
 		core->regs.sp -= ARCH_WORD_SIZE;
 	}
 }

@@ -1,22 +1,26 @@
+#include "instructions.h" // arch_instr needed for definition in arch_core
+#include <pthread.h>	// pthread_t needed for definition of arch_core
+
 #ifndef VMOS_ARCH_H
 #define VMOS_ARCH_H
 
 #ifndef RAM_SIZE
-#define RAM_SIZE 1024
+#define RAM_SIZE	1024
 #endif
 
 #ifndef DISK_SIZE
-#define DISK_SIZE 2048
+#define DISK_SIZE	2048
 #endif
 
 #define ARCH_BYTE_SIZE sizeof(unsigned char)
 #define ARCH_HWORD_SIZE sizeof(unsigned short)
 #define ARCH_WORD_SIZE sizeof(unsigned int)
 #define ARCH_DWORD_SIZE sizeof(unsigned long)
+#define ARCH_ADDR_NULL	0
 
 /* Interrupt Vector Address and Interrupt Offsets */
-#define INTRPT_OFFSET 0x0 /* interrupt vector starts at 0x0*/
-#define INTRPT_SIZE  0x18 /* interrupt vector size */
+#define INTRPT_OFFSET 	0x0 /* interrupt vector starts at 0x0*/
+#define INTRPT_SIZE  	0x18 /* interrupt vector size */
 
 #define INTRPT_OFF_RESET INTRPT_OFFSET + 0x0  /* Reset the computer */
 #define INTRPT_OFF_UNDEF INTRPT_OFFSET + 0x4  /* Undefined instruction */
@@ -30,7 +34,7 @@
 #define CORE_PARALLEL 0		// This establishes if instruction pipelining happens.
 #define CORE_STEPS    3		// This is how many steps are taken to complete one CPU instruction (fetching, decoding, executing)
 #define CORE_EXE_STEP CORE_STEPS - 1
-// NOTE: execution step must always be the last step. (probably not true now)
+// NOTE: execution step must always be the last step (probably not true now)
 
 typedef unsigned char   arch_byte;
 typedef unsigned short  arch_hword;
@@ -40,12 +44,11 @@ typedef unsigned int    arch_addr;
 typedef int             arch_int;
 typedef unsigned int    arch_uint;
 typedef long            arch_long;
-typedef unsigned long   arch_long;
+typedef unsigned long   arch_ulong;
 typedef float           arch_float;
 typedef double          arch_double;
 typedef unsigned char   arch_bool;
 typedef void(* arch_pipe_func)(arch_core*);
-
 
 #undef TRUE
 #undef FALSE
@@ -56,7 +59,7 @@ typedef struct
 {
 	arch_word   ac;				/* accumulator */
 	arch_word   zr;			    /* zero register */
-	arch_word   gen_reg[10];		/* general-purpose registers */
+	arch_word   gen_reg[10];	/* general-purpose registers */
 	arch_addr   pc;				/* program counter */
 	arch_instr  ir;				/* instruction register */
 	arch_addr   sp;				/* stack pointer */
@@ -82,11 +85,13 @@ typedef struct
 
 typedef struct
 {
+	arch_uint		id;
 	arch_registers  regs;
 	arch_alu        alu;
 	arch_pipe_func	pipeline[CORE_STEPS];
 	arch_word       cycle_count;
 	arch_bool       is_enabled_intrpt;
+	pthread_t		thread;
 } arch_core;
 
 typedef struct
@@ -101,16 +106,24 @@ typedef struct
 typedef struct
 {
 	arch_dma_registers* registers;
-	arch_addr*          devices;
-	arch_word           size;
+	arch_device**       devices;
+	arch_addr			active_device;
+	const arch_word    	size;
+	arch_bool*			bus_access;
 } arch_dma;
 
-extern volatile arch_byte core_ram[RAM_SIZE * ARCH_WORD_SIZE];
+typedef struct
+{
+	arch_addr address;
+	arch_addr* access;
+} arch_device;
+
+extern volatile arch_byte arch_memory[RAM_SIZE * ARCH_WORD_SIZE];
 
 extern arch_core*   init_core_default   ();                         /* will initialize a core for use in cycle() */
 extern arch_core*   init_core   		(arch_registers*, arch_pipe_func*, arch_addr);
 extern void         cycle       		(arch_core**, arch_uint);   /* will cycles through every core in the list */
 extern void         thread      		(arch_core*, arch_addr);    /* will jump core into process entry point*/
-extern arch_addr    connect_dma 		(void(*)(arch_dma*));
+extern arch_addr    connect_dma 		(arch_device*);				/* connects a device and provides the address for programming */
 
 #endif /* architecture.h */

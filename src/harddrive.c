@@ -1,7 +1,8 @@
 #include "architecture.h"
 #include "handler.h"
-#include <stdio.h> // to save/load hard drive 
-#include <stdbool.h>
+#include <stddef.h> // for NULL
+#include <stdio.h>  // to save/load hard drive
+#include <stdlib.h> // for malloc()
 
 typedef struct
 {
@@ -11,38 +12,39 @@ typedef struct
 typedef struct
 {
     /* data */
-} arch_boot_record;
+} arch_partition_table;
 
 typedef struct
 {
-    union
+    arch_byte   storage[DISK_SIZE * 4];
+    arch_device device;
+} arch_drive;
+
+typedef struct
+{
+    arch_byte*  data;
+    arch_uint   size;
+} drive_file;
+
+
+arch_device* access_drive(const char* path)
+{
+    FILE* disc_file = NULL;
+    disc_file = fopen(path, "r");
+    if (disc_file == NULL)
     {
-        arch_word data;
-        struct
-        {
-            arch_word power:   1;
-            arch_word full:    1;
-            arch_word empty:   1;
-            arch_word no_conn: 1;
-            arch_word reading: 1;
-            arch_word writing: 1;
-        };
-    } status_reg;
-    char storage[DISK_SIZE * 4]; 
-} arch_disk;
-
-void access_disk(const char* path)
-{
-    FILE* disk_file = NULL;
+        send_error(disc_not_attached);
+    }
+    drive_file* full_file = malloc(sizeof(drive_file));
 }
 
-bool write_to_disk(arch_disk* disk, const char* filename)
+arch_bool write_to_disc(arch_drive* drive, const char* filename)
 {
-    return false;
+    return FALSE;
 }
 
-bool write_to_disk(arch_disk* disk, FILE* file)
+arch_bool write_to_disc(arch_drive* drive, FILE* file)
 {
-    return false;
+    return FALSE;
 }
 
