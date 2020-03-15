@@ -168,4 +168,6 @@ arch_byte*			help_get_ram_addr		(arch_addr);
 arch_addr			help_get_arch_addr		(arch_byte*);
 
 
+extern void			write_to_memory		();							/* utility to write directly onto memory (USE SPARINGLY) */
+
 #endif /* architecture.h */

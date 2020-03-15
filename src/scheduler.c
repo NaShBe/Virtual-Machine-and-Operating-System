@@ -1,5 +1,6 @@
 #include "scheduler.h"
 #include "process.h"
+<<<<<<< HEAD
 #include "handler.h"
 #include "loader.h"
 #include <unistd.h>
@@ -158,3 +159,9 @@ void help_add_to_queue(queue* process_queue, vmos_pcb* pcb)
     process_queue->count = process_queue->count++;
     process_queue->pcb[process_queue->count + 1] = pcb; 
 } 
+=======
+
+static vmos_pcb* wait_queue;
+static vmos_pcb* ready_queue;
+
+>>>>>>> working on code to adapt new IO

@@ -1,6 +1,7 @@
 #ifndef VMOS_SCHEDULER_H
 #define VMOS_SCHEDULER_H
 
+<<<<<<< HEAD
 #include "process.h"
 
 typedef struct
@@ -14,3 +15,8 @@ init_scheduler(vmos_pcb_list process_list, arch_core* cores);
 vmos_pcb* select_process_for_core(arch_uint cpuid);
 
 #endif 
+=======
+
+
+#endif
+>>>>>>> working on code to adapt new IO

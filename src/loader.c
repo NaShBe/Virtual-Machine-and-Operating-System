@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include "vmos.h"
 #include "loader.h"
 #include "architecture.h"
@@ -11,6 +12,18 @@
 
 vmos_pcb_list* loaded_processes = NULL;
 vmos_pcb_list* unloaded_processes = NULL;
+=======
+#include "loader.h"
+#include "architecture.h"
+#include "process.h"
+
+process_list loaded_processes;
+
+vmos_pcb* load_process(arch_file_meta* file, arch_addr address)
+{
+
+}
+>>>>>>> working on code to adapt new IO
 
 void free_jobs();
 void load_jobs();
