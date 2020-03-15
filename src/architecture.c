@@ -411,19 +411,58 @@ static void jump(arch_core* core)
 
 static void branch(arch_core* core)
 {
+	arch_addr jmp_addr;
 	switch (core->regs.ir.opcode)
 	{
 		case BEQ:
+			if (((cond_imm_data)core->regs.ir.data).breg == ((cond_imm_data)core->regs.ir.data).dreg)
+			{
+				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
+				core->regs.pc = jmp_addr;
+				return;
+			}
+			else {return;} 
 			break;
 		case BNE:
+			if (((cond_imm_data)core->regs.ir.data).breg != ((cond_imm_data)core->regs.ir.data).dreg)
+			{
+				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
+				core->regs.pc = jmp_addr;
+			}
+			else {return;} 
 			break;
 		case BEZ:
+			if (((cond_imm_data)core->regs.ir.data).breg == core->regs.zr)
+			{
+				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
+				core->regs.pc = jmp_addr;
+			}
+			else {return;} 
+
 			break;
 		case BNZ:
+			if (((cond_imm_data)core->regs.ir.data).breg != core->regs.zr)
+			{
+				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
+				core->regs.pc = jmp_addr;
+			}
+			else {return;} 
 			break;
 		case BGZ:
+			if (((cond_imm_data)core->regs.ir.data).breg > core->regs.zr)
+			{
+				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
+				core->regs.pc = jmp_addr;
+			}
+			else {return;} 
 			break;
 		case BLZ:
+			if (((cond_imm_data)core->regs.ir.data).breg < core->regs.zr)
+			{
+				jmp_addr = ((cond_imm_data) core->regs.ir.data).addr;
+				core->regs.pc = jmp_addr;
+			}
+			else {return;} 
 			break;
 	}
 }
