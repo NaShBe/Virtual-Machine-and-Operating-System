@@ -162,4 +162,6 @@ extern void			help_write_to_mem		(arch_byte*, arch_uint, arch_addr);
 extern void 		help_write_to_mem_word	(arch_word*, arch_addr);
 
 
+extern void			write_to_memory		();							/* utility to write directly onto memory (USE SPARINGLY) */
+
 #endif /* architecture.h */

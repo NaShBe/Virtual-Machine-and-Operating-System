@@ -2,6 +2,7 @@
 #define VMOS_PROCESS_H
 
 #include "architecture.h"   // needed for arch_registers
+#include "harddrive.h"
 #include "vmos.h"           // needed for vmos_uint
 
 typedef enum
@@ -15,7 +16,7 @@ typedef enum
 
 typedef struct
 {
-    arch_byte* memory;
+    arch_addr memory;
     vmos_uint  size;
 } vmos_process;
 
@@ -30,6 +31,7 @@ typedef struct                      /* every loaded program must have a pcb atta
     const arch_instr    rtend;          /* this is where the cpu will hang until it is redirected by the dispatcher */
 } vmos_pcb;
 
+<<<<<<< HEAD
 typedef struct
 {
     vmos_uint count;
@@ -38,5 +40,9 @@ typedef struct
 } vmos_pcb_list;
 
 
+=======
+vmos_pcb* create_pcb(arch_file_meta*, arch_addr);        /* will create a PCB given the file metadata with the specified offset */
+vmos_pcb* get_process_info(arch_addr);                  /* provides the PCB for a process when given an address that resides in the process's memory space */
+>>>>>>> working on code to adapt new IO
 
 #endif
