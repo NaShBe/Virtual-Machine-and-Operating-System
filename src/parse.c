@@ -1,36 +1,47 @@
+#include "parse.h"
 #include "handler.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 
-static FILE* file;
+static FILE* input_file;
+static FILE* context_file;
 
-void parse_file(const char*);
-void output_context(const char*);
+parse_jobs parse_file(const char*);
+void output_context(parse_jobs*);
 void read_file(const char*);
 
-void parse_file(const char* path)
+parse_jobs parse_file(const char* path)
 {
     read_file(path);
     char current_char;
-    while ((current_char = fgetc(file)) != EOF)
+
+    while ((current_char = fgetc(input_file)) != EOF)
     {
-        
+        if (current_char != '\n')
+        {
+
+        }
     }
 
+    fclose(input_file);
 }
 
-void output_context(const char* path)
+void output_context(parse_jobs* info)
 {
 
 }
 
 void read_file(const char* path)
 {
-    file = fopen(path, "r");
-    if (file == NULL)
+    input_file = fopen(path, "r");
+    if (input_file == NULL)
     {
-        send_error(bad_malloc);
+        send_error(parser_file_error);
     }
 }
 
+void help_add_to_jobs(parse_data* job)
+{
+    
+}

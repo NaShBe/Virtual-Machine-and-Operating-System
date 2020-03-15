@@ -73,6 +73,9 @@ static void abort_handle()
         case disc_corruption:
             fprintf(stderr, "Disc data corrupted and cannot be read, aborting...\n%s: %s", error_filename, error_line);
             break;
+        case parser_file_error:
+            fprintf(stderr, "VMOS could not read the input file, aborting...\n%s: %s", error_filename, error_line);
+            break;
         default:
             fprintf(stderr, "Unspecified error, aborting....\n%s: %s");
     }
