@@ -5,7 +5,7 @@
 int main(int argc, char** argv)
 {
 
-    parse_jobs* test_jobs = parse_file(argv[1]);
+    job_list* test_jobs = parse_file(argv[1]);
 
     /*
     init_error();
