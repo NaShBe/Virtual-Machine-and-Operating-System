@@ -22,11 +22,11 @@ typedef struct
 static FILE* input_file;
 static FILE* context_file;
 
-parse_jobs parse_file(const char*);
-void output_context(parse_jobs*);
+job_list* parse_file(const char*);
+void output_context(job_list*);
 void read_file(const char*);
 
-parse_jobs parse_file(const char* path)
+job_list* parse_file(const char* path)
 {
     read_file(path);
     arch_int read_stat = 0;
@@ -35,7 +35,7 @@ parse_jobs parse_file(const char* path)
     job_descriptor*     job = NULL;
     data_descriptor*    data = NULL;
     
-    parse_jobs* jobs = malloc(sizeof(parse_jobs));
+    job_list* jobs = malloc(sizeof(job_list));
     if (jobs == NULL)
     {
         send_error(bad_malloc);
@@ -122,11 +122,10 @@ parse_jobs parse_file(const char* path)
             }
         }
     }
-
     fclose(input_file);
 }
 
-void output_context(parse_jobs* info)
+void output_context(job_list* info)
 {
 
 }
@@ -140,9 +139,9 @@ void read_file(const char* path)
     }
 }
 
-parse_data* help_create_job(arch_uint priority, arch_uint i_size, arch_instr* instr, arch_uint d_size, arch_word* data)
+parse_job* help_create_job(arch_uint priority, arch_uint i_size, arch_instr* instr, arch_uint d_size, arch_word* data)
 {
-    parse_data* job = malloc(sizeof(parse_data));
+    parse_job* job = malloc(sizeof(parse_job));
     if (job == NULL)
     {
         send_error(bad_malloc);
@@ -153,11 +152,10 @@ parse_data* help_create_job(arch_uint priority, arch_uint i_size, arch_instr* in
     job->instructions = instr;
     job->data_size = d_size;
     job->data = data;
-
     return job;
 }
 
-void help_add_to_jobs(parse_data* job)
+void help_add_to_jobs(parse_job* job)
 {
     
 }

@@ -15,14 +15,17 @@ typedef struct
     arch_instr* instructions;
     arch_uint   data_size;
     arch_word*  data;
-} parse_data;
+} parse_job;
 
 typedef struct
 {
     arch_uint   size;
     arch_uint   capacity;
-    parse_data* jobs;
-} parse_jobs;
+    parse_job*  jobs;
+} job_list;
 
+extern job_list* parse_file(const char*);
+extern void output_context(job_list*);
+extern void read_file(const char*);
 
 #endif
