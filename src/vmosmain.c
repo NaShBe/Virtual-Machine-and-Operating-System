@@ -4,8 +4,22 @@
 
 int main(int argc, char** argv)
 {
+    init_error();
+    job_list* test_jobs;
+    if (argc > 1)
+    {
+        test_jobs = parse_file(argv[1]);
+    }
+    else
+    {
+        send_error(file_no_input);
+    }
 
-    job_list* test_jobs = parse_file(argv[1]);
+    if (argc > 2)
+    {
+        
+    }
+    
 
     /*
     init_error();

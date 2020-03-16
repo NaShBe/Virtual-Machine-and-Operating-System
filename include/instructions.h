@@ -3,11 +3,13 @@
 
 // Format Defines
 // first two bits of instruction, determines type
+#define SIZE_FORMAT 2
 #define FORMAT_AIF  0x00	// Arithmatic Instruction Format
 #define FORMAT_CBIF 0x01	// Conditional Branch & Immediate Instruction Format
 #define FORMAT_UJF  0x02	// Unconditional Jump Format
 #define FORMAT_IOIF 0x03	// I/O Instruction Format
 
+#define SIZE_OPCODE 4
 #define RD   0x00	// Load contents of input buffer into the accumulator
 #define WR   0x01	// Write the contents of accumulator into output buffer
 #define ST   0x02	// Store contents of a register into RAM
@@ -86,6 +88,14 @@ typedef union
 		unsigned int addr: 16;
 	};
 } inp_out_data;
+
+typedef struct 
+{
+	arch_uint	size;
+	arch_uint 	capacity;
+	arch_instr*	instructions;
+}instruction_list;
+
 
 
 #endif
