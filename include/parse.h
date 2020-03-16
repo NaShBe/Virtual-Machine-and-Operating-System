@@ -1,8 +1,10 @@
 #ifndef VMOS_PARSE_H
 #define VMOS_PARSE_H
 
-#define VMOS_PARSED_SUCCESS 0
-#define VMOS_PARSED_FAILURE 1
+#define PARSED_SUCCESS 0
+#define PARSED_FAILURE 1
+
+#define PARSE_INIT_CAPACITY 30
 
 #include "architecture.h"
 

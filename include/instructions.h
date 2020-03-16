@@ -37,6 +37,11 @@
 #define BLZ  0x1A	// Branch to an address if
 #define SWE  0x1B	// Software Interrupt
 
+#define BITFIELD_FORMAT 	0xC0000000
+#define BITOFFSET_FORMAT	30
+#define BITFIELD_OPCODE		0x3C000000
+#define BITOFFSET_OPCODE	26
+
 typedef union
 {
 	unsigned int int_rep;
