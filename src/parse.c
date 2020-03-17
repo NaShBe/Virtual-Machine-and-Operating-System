@@ -22,9 +22,9 @@ job_list* parse_file(const char*);
 void output_context(job_list*);
 void read_file(const char*);
 
-job_list* parse_file(const char* path)      // takes a path to start reading from
+job_list* parse_file(const char* path)
 {
-    if (path != NULL)                       // this is in case we don't use read_file() first
+    if (path != NULL)
     {
         read_file(path);
     }
@@ -34,42 +34,31 @@ job_list* parse_file(const char* path)      // takes a path to start reading fro
         send_error(parser_file_error);
     }
 
-    arch_char*          read_line;          // we read the input file line by line, we parse it in a while loop
-    job_descriptor*     job = NULL;         // a description of the job
-    data_descriptor*    data = NULL;        // a description of the data attached to the job
+    arch_char*          read_line;
+    job_descriptor*     job = NULL;
+    data_descriptor*    data = NULL;
     
-    job_list* jobs = malloc(sizeof(job_list));  // this is the list of jobs parsed from the input file
+    job_list* jobs = malloc(sizeof(job_list));
     if (jobs == NULL)
     {
         send_error(bad_malloc);
     }
-    jobs->capacity = PARSE_INIT_CAPACITY;       // initializing the list of jobs
+    jobs->capacity = PARSE_INIT_CAPACITY;
     jobs->count = 0;
     jobs->jobs = NULL;
 
-    while (fgets(read_line, LINE_MAX, input_file) != NULL)  // we read every line
+    while (fgets(read_line, LINE_MAX, input_file) != NULL)
     {
-        instruction_list* instr_list = NULL;                       // this will save all the instructions for the specific job being parsed
-        arch_word*        data_list = NULL;                        // this will save all the data for the specific job being parsed
+        instruction_list* instr_list = NULL;                       
+        arch_word*        data_list = NULL;                        
         arch_char* field_type = NULL;
-        strlcpy(field_type, read_line, SIZE_FORMAT);        // we check the field type "//" or "0x" to determine if its a header or actual data
-        if (strcmp(field_type, "//") == 0)                  // this if statement holds the code for dealing with headers "job, data, and end"
+        strlcpy(field_type, read_line, SIZE_FORMAT);        
+        if (strcmp(field_type, "//") == 0)                  
         {
-            arch_char* header_type;                         // `job`, `data`, or `end`
-            // the meaning of these fields depends on the header type, `end` will ignore these
-            // for `job`: field1 = job#; field2 = instruction count; field3 = priority
-            // for `data`: field1 input buffer size; field2 = output buffer size; field3 = temp buffer size
+            arch_char* header_type;
             arch_char* field1;
             arch_char* field2;
-            arch_char* field3;                              
-
-            /* we used strtok to get each string separated by " " (space)
-               for example: "JOB 3 12 2" will be parsed into their respective variables:
-                - header_type = "JOB"
-                - field1 = "3"
-                - field2 = "12"
-                - field3 = "2"
-            */
+            arch_char* field3;
 
             header_type = strtok(read_line, " ");
             if (header_type == NULL)
@@ -94,8 +83,8 @@ job_list* parse_file(const char* path)      // takes a path to start reading fro
             
             header_type = help_to_lower_string(header_type);
 
-            if (strcmp(header_type, "job") == 0)            // If the header is `job`, fill the job descriptor with the appropriate information
-            {                                               // that information will be used to add to instr_list, the list of instructions for this job
+            if (strcmp(header_type, "job") == 0)
+            {
                 if (job == NULL && data == NULL)
                 {
                     job = malloc(sizeof(job_descriptor));
@@ -151,7 +140,7 @@ job_list* parse_file(const char* path)      // takes a path to start reading fro
                 }
             }
         }
-        else if (strcmp(field_type, "0x") == 0);        // UNFINISHED: this code will write to instr_list and data_list
+        else if (strcmp(field_type, "0x") == 0);
         {
             if (job != NULL && data == NULL)
             {
@@ -184,7 +173,7 @@ job_list* parse_file(const char* path)      // takes a path to start reading fro
             }
         }
     }
-    fclose(input_file);     // close the input file, we are done parsing.
+    fclose(input_file);
 }
 
 void output_context(job_list* info)
