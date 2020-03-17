@@ -12,10 +12,19 @@
 #define DISK_SIZE	2048
 #endif
 
-#define ARCH_BYTE_SIZE sizeof(unsigned char)
-#define ARCH_HWORD_SIZE sizeof(unsigned short)
-#define ARCH_WORD_SIZE sizeof(unsigned int)
-#define ARCH_DWORD_SIZE sizeof(unsigned long)
+#define ARCH_BYTE_SIZE	sizeof(arch_byte)
+#define ARCH_HWORD_SIZE sizeof(arch_hword)
+#define ARCH_WORD_SIZE	sizeof(arch_word)
+#define ARCH_DWORD_SIZE sizeof(arch_dword)
+
+#define ARCH_INT_SIZE		sizeof(arch_int)
+#define ARCH_UINT_SIZE		sizeof(arch_uint)
+#define ARCH_CHAR_SIZE		sizeof(arch_char)
+#define ARCH_UCHAR_SIZE		sizeof(arch_uchar)
+#define ARCH_FLOAT_SIZE		sizeof(arch_float)
+#define ARCH_DOUBLE_SIZE	sizeof(arch_double)
+#define ARCH_BOOL_SIZE		sizeof(arch_bool)
+
 #define ARCH_ADDR_NULL	0
 
 /* Interrupt Vector Address and Interrupt Offsets */
@@ -41,6 +50,8 @@ typedef unsigned short  arch_hword;
 typedef unsigned int    arch_word;
 typedef unsigned long   arch_dword;
 typedef unsigned int    arch_addr;
+typedef char			arch_char;
+typedef unsigned char	arch_uchar;
 typedef int             arch_int;
 typedef unsigned int    arch_uint;
 typedef long            arch_long;

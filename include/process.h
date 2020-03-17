@@ -20,6 +20,7 @@ typedef struct
 typedef struct                      /* every loaded program must have a pcb attached to it */
 {
     vmos_uint       pid;            /* unique id attached to job */
+    vmos_uint       fd;             /* which file this is (for data input) */
     status_enum     program_status; /* whether the program is running, successful, or unsuccessful in execution */
     arch_registers  state_reg;      /* holds the state of the core registers for resuming execution of queued jobs */
     vmos_process    process;

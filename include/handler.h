@@ -13,7 +13,9 @@ typedef enum
     ram_outbounds,
     reg_invalid,
     disc_not_attached,
-    disc_corruption
+    disc_corruption,
+    parser_file_error,
+    file_no_input
 } error_type_enum;
 
 extern error_type_enum error_type;
