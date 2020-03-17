@@ -1,6 +1,7 @@
 #include "parse.h"
 #include "handler.h"
 #include "instructions.h"
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,7 +20,7 @@ static FILE* input_file = NULL;
 static FILE* context_file = NULL;
 
 job_list* parse_file(const char*);
-void output_context(job_list*);
+void output_context(job_list*, const arch_char*);
 void read_file(const char*);
 
 job_list* parse_file(const char* path)
@@ -176,9 +177,63 @@ job_list* parse_file(const char* path)
     fclose(input_file);
 }
 
-void output_context(job_list* info)
+void output_context(job_list* info, const arch_char* file)
 {
-
+    FILE *fp;
+    if( access( file, F_OK ) != -1 ) {
+        // file exists
+        fp = fopen(file, "w+");
+    }
+    else
+    {
+        // file doesn't exist
+        fp = fopen(file, "w");
+    }
+    for (arch_int i = 0; i < info->count; i++)
+    {
+        fprintf(fp, "opcode: %i, priority of %i\n", i, info->jobs[i]->priority);
+        for (arch_int j = 0; j < info->jobs[i]->instr_count; j++)
+        {
+            if (info->jobs[i]->instructions[j].format == FORMAT_AIF) // If the format is arithmetic instruction 
+            { 
+                fprintf(fp, "#%i opcode: %i src1: %i, src2: %i, dest: %i\n", j,
+                        ((arch_instr)(info->jobs[i]->instructions[j])).opcode,
+                        ((arith_data)(info->jobs[i]->instructions[j].data)).src1,
+                        ((arith_data)(info->jobs[i]->instructions[j].data)).src2,
+                        ((arith_data)(info->jobs[i]->instructions[j].data)).dest);
+            }
+            if (info->jobs[i]->instructions[j].format == FORMAT_CBIF) // If the format is Conditional Branch & Immediate Instruction instruction 
+            {
+                fprintf(fp, "#%i Conditional Branch or Immediate opcode: %i breg: %i, dreg: %i, addr: %i\n", j,
+                        ((arch_instr)(info->jobs[i]->instructions[j])).opcode,
+                        ((cond_imm_data)(info->jobs[i]->instructions[j].data)).breg,
+                        ((cond_imm_data)(info->jobs[i]->instructions[j].data)).dreg,
+                        ((cond_imm_data)(info->jobs[i]->instructions[j].data)).addr);
+            }
+            if (info->jobs[i]->instructions[j].format == FORMAT_UJF) // If the format is Unconditional Jump instruction 
+            {
+                fprintf(fp, "#%i opcode: %i data: %i\n", j,
+                        ((arch_instr)(info->jobs[i]->instructions[j])).opcode,
+                        ((arch_instr)(info->jobs[i]->instructions[j])).data);
+            }
+            if (info->jobs[i]->instructions[j].format == FORMAT_IOIF) // If the format is I/O instruction 
+            {
+                fprintf(fp, "#%i I/O opcode: %i: reg1: %i, reg2: %i, addr: %i\n", j,
+                        ((arch_instr)(info->jobs[i]->instructions[j])).opcode,
+                        ((inp_out_data)(info->jobs[i]->instructions[j].data)).reg1,
+                        ((inp_out_data)(info->jobs[i]->instructions[j].data)).reg2,
+                        ((inp_out_data)(info->jobs[i]->instructions[j].data)).addr);
+            }
+        }
+        
+        fprintf(fp, "end of instructions \n data: \n", i);
+        for (arch_int k = 0; k < info->jobs[i]->data_count; k++) 
+        {
+            fprintf(fp, "#%i %i", k, ((arch_word)info->jobs[i]->data[k]));
+        }
+        fprintf(fp, "end of job #%i\n\n", i);      
+    }
+    fclose(fp);
 }
 
 void read_file(const char* path)
