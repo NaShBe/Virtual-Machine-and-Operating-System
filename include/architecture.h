@@ -137,4 +137,6 @@ extern void         cycle       		(arch_core**, arch_uint);   /* will cycles thr
 extern void         thread      		(arch_core*, arch_addr);    /* will jump core into process entry point*/
 extern arch_addr    connect_dma 		(arch_device*);				/* connects a device and provides the address for programming */
 
+extern void			write_to_memory		();							/* utility to write directly onto memory (USE SPARINGLY) */
+
 #endif /* architecture.h */
