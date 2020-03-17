@@ -39,7 +39,7 @@ typedef struct
 } data_descriptor;
 
 extern job_list* parse_file(const char*);
-extern void output_context(job_list*);
+void output_context(job_list*, const arch_char*);
 extern void read_file(const char*);
 
 #endif
