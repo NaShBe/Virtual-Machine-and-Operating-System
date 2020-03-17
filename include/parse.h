@@ -11,18 +11,32 @@
 typedef struct
 {
     arch_uint   priority;
-    arch_uint   instr_size;
+    arch_uint   instr_count;
     arch_instr* instructions;
-    arch_uint   data_size;
+    arch_uint   data_count;
     arch_word*  data;
 } parse_job;
 
 typedef struct
 {
-    arch_uint   size;
+    arch_uint   count;
     arch_uint   capacity;
-    parse_job*  jobs;
+    parse_job** jobs;
 } job_list;
+
+typedef struct
+{
+    arch_uint job_num;
+    arch_uint instr_count;
+    arch_uint priority;
+} job_descriptor;
+
+typedef struct
+{
+    arch_uint input_buff_size;
+    arch_uint output_buff_size;
+    arch_uint temp_buff_size;
+} data_descriptor;
 
 extern job_list* parse_file(const char*);
 extern void output_context(job_list*);

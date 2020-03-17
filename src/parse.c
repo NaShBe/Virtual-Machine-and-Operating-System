@@ -7,24 +7,16 @@
 #include <ctype.h>
 
 #define LINE_MAX        50
+#define FIELD_OFFSET    0
 #define HEADER_OFFSET   3
 
-typedef struct
-{
-    arch_uint job_num;
-    arch_uint instr_count;
-    arch_uint priority;
-} job_descriptor;
+#define DATA_INPUT_BUFFER_SIZE  0x14
+#define DATA_OUTPUT_BUFFER_SIZE 0xC
+#define DATA_TEMP_BUFFER_SIZE   0xC
+#define DATA_TOTAL_SIZE DATA_TEMP_BUFFER_SIZE + DATA_INPUT_BUFFER_SIZE + DATA_OUTPUT_BUFFER_SIZE
 
-typedef struct
-{
-    arch_uint input_buff_size;
-    arch_uint output_buff_size;
-    arch_uint temp_buff_size;
-} data_descriptor;
-
-static FILE* input_file;
-static FILE* context_file;
+static FILE* input_file = NULL;
+static FILE* context_file = NULL;
 
 job_list* parse_file(const char*);
 void output_context(job_list*);
@@ -52,14 +44,14 @@ job_list* parse_file(const char* path)      // takes a path to start reading fro
         send_error(bad_malloc);
     }
     jobs->capacity = PARSE_INIT_CAPACITY;       // initializing the list of jobs
-    jobs->size = 0;
+    jobs->count = 0;
     jobs->jobs = NULL;
 
     while (fgets(read_line, LINE_MAX, input_file) != NULL)  // we read every line
     {
-        instruction_list* instr_list;                       // this will save all the instructions for the specific job being parsed
-        arch_word*        data_list;                        // this will save all the data for the specific job being parsed
-        arch_char* field_type;
+        instruction_list* instr_list = NULL;                       // this will save all the instructions for the specific job being parsed
+        arch_word*        data_list = NULL;                        // this will save all the data for the specific job being parsed
+        arch_char* field_type = NULL;
         strlcpy(field_type, read_line, SIZE_FORMAT);        // we check the field type "//" or "0x" to determine if its a header or actual data
         if (strcmp(field_type, "//") == 0)                  // this if statement holds the code for dealing with headers "job, data, and end"
         {
@@ -78,6 +70,7 @@ job_list* parse_file(const char* path)      // takes a path to start reading fro
                 - field2 = "12"
                 - field3 = "2"
             */
+
             header_type = strtok(read_line, " ");
             if (header_type == NULL)
             {
@@ -99,12 +92,11 @@ job_list* parse_file(const char* path)      // takes a path to start reading fro
                 send_error(parser_file_error);
             }
             
-            header_type = help_to_lower_string(header_type); // this is so capitalization does not cause errors
-            // HELP_TO_LOWER_STRING NOT IMPLEMENTED YET
+            header_type = help_to_lower_string(header_type);
 
             if (strcmp(header_type, "job") == 0)            // If the header is `job`, fill the job descriptor with the appropriate information
             {                                               // that information will be used to add to instr_list, the list of instructions for this job
-                if (job == NULL)
+                if (job == NULL && data == NULL)
                 {
                     job = malloc(sizeof(job_descriptor));
                     if (job == NULL)
@@ -129,7 +121,14 @@ job_list* parse_file(const char* path)      // takes a path to start reading fro
             {
                 if (data == NULL && job != NULL)
                 {
-
+                    data = malloc(sizeof(data_descriptor));
+                    if (data == NULL)
+                    {
+                        send_error(bad_malloc);
+                    }
+                    data->input_buff_size = DATA_INPUT_BUFFER_SIZE;
+                    data->output_buff_size = DATA_OUTPUT_BUFFER_SIZE;
+                    data->temp_buff_size = DATA_TEMP_BUFFER_SIZE;
                 }
 
                 else
@@ -139,27 +138,49 @@ job_list* parse_file(const char* path)      // takes a path to start reading fro
                 
             }
 
-            else if (strcmp(field_type, "end") == 0)    // NOT FINISHEDL if the header is `end` and both the job and data descriptor are filled out,
-            {                                           // create the job and add it to the job list
+            else if (strcmp(field_type, "end") == 0)
+            {
                 if (data == NULL || job == NULL)
                 {
                     send_error(parser_file_error);
                 }
-
                 else
                 {
-                    
+                    parse_job* new_job = help_create_job(job, data, instr_list, data_list);
+                    help_add_to_job_list(jobs, new_job);
                 }
             }
         }
         else if (strcmp(field_type, "0x") == 0);        // UNFINISHED: this code will write to instr_list and data_list
         {
-            if (job != NULL)
+            if (job != NULL && data == NULL)
             {
+                instr_list = malloc(sizeof(arch_instr) * job->instr_count);
+                if (instr_list == NULL)
+                {
+                    send_error(bad_malloc);
+                }
                 for (arch_int i = 0; i < job->instr_count; i++)
                 {
-                    
+                    sscanf(read_line + SIZE_FORMAT, "%i", &instr_list[i]);
                 }
+            }
+
+            else if (job != NULL && data != NULL)
+            {
+                data_list = malloc (sizeof(arch_word) * DATA_TOTAL_SIZE);
+                if (data_list == NULL)
+                {
+                    send_error(bad_malloc);
+                }
+                for (arch_int i = 0; i < DATA_TOTAL_SIZE; i++)
+                {
+                    sscanf(read_line + SIZE_FORMAT, "%i", &data_list[i]);
+                }
+            }
+            else
+            {
+                send_error(parser_file_error);
             }
         }
     }
@@ -180,7 +201,29 @@ void read_file(const char* path)
     }
 }
 
-parse_job* help_create_job(arch_uint priority, arch_uint i_size, arch_instr* instr, arch_uint d_size, arch_word* data)
+void help_add_to_job_list(job_list* list, parse_job* job)
+{
+    if (list->count >= list->capacity)
+    {
+        list->capacity += 10;
+        list->jobs = realloc(list->jobs, list->capacity);
+        if (list->jobs == NULL)
+        {
+            send_error(bad_malloc);
+        }
+    }
+
+    list->jobs[list->count] = job;
+    list->count++;
+}
+
+parse_job* help_create_job
+    (
+        job_descriptor* job_descript,
+        data_descriptor* data_descript,
+        arch_instr* instructions,
+        arch_word* data
+    )
 {
     parse_job* job = malloc(sizeof(parse_job));
     if (job == NULL)
@@ -188,17 +231,14 @@ parse_job* help_create_job(arch_uint priority, arch_uint i_size, arch_instr* ins
         send_error(bad_malloc);
     }
 
-    job->priority = priority;
-    job->instr_size = i_size;
-    job->instructions = instr;
-    job->data_size = d_size;
+    job->priority = job_descript->priority;
+    job->instr_count = job_descript->instr_count;
+    job->instructions = instructions;
+    job->data_count = data_descript->input_buff_size
+                    + data_descript->output_buff_size
+                    + data_descript->temp_buff_size;
     job->data = data;
     return job;
-}
-
-void help_add_to_jobs(parse_job* job)
-{
-    
 }
 
 arch_instr help_parse_to_instr(arch_uint data)
