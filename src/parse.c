@@ -117,7 +117,7 @@ job_list* parse_file(const char* path)      // takes a path to start reading fro
                 }
             }
 
-            else if (strcmp(field_type, "data") == 0)   // NOT IMPLEMENTED: if the header is `data`, the data descriptor is filled out
+            else if (strcmp(field_type, "data") == 0)
             {
                 if (data == NULL && job != NULL)
                 {
@@ -162,7 +162,7 @@ job_list* parse_file(const char* path)      // takes a path to start reading fro
                 }
                 for (arch_int i = 0; i < job->instr_count; i++)
                 {
-                    sscanf(read_line + SIZE_FORMAT, "%i", &instr_list[i]);
+                    sscanf(read_line, "%i", &instr_list[i]);
                 }
             }
 
@@ -175,7 +175,7 @@ job_list* parse_file(const char* path)      // takes a path to start reading fro
                 }
                 for (arch_int i = 0; i < DATA_TOTAL_SIZE; i++)
                 {
-                    sscanf(read_line + SIZE_FORMAT, "%i", &data_list[i]);
+                    sscanf(read_line, "%i", &data_list[i]);
                 }
             }
             else
