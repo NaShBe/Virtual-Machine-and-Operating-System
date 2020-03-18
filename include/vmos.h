@@ -8,6 +8,11 @@ typedef unsigned short  vmos_ushort;
 typedef short           vmos_short;
 typedef unsigned int    vmos_uint;
 typedef int             vmos_int;
+typedef unsigned int    vmos_bool;
+#undef TRUE
+#undef FALSE
+#define TRUE 1
+#define FALSE 0
 typedef struct vmos_pcb vmos_pcb;
 
 

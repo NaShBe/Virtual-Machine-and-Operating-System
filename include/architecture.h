@@ -160,6 +160,8 @@ extern arch_addr    connect_dma 			(arch_device*);				/* connects a device and p
 
 extern void			help_write_to_mem		(arch_byte*, arch_uint, arch_addr);
 extern void 		help_write_to_mem_word	(arch_word*, arch_addr);
+arch_byte*			help_get_ram_addr		(arch_addr);
+arch_addr			help_get_arch_addr		(arch_byte*);
 
 
 #endif /* architecture.h */

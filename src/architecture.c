@@ -61,7 +61,8 @@ static void interrupt	(arch_core*);
 // helper functions
 void       			help_write_to_mem		(arch_byte*, arch_uint, arch_addr);
 void 				help_write_to_mem_word	(arch_word*, arch_addr);
-static arch_byte*	help_get_ram_addr		(arch_addr);
+arch_byte*			help_get_ram_addr		(arch_addr);
+arch_addr			help_get_arch_addr		(arch_byte*);
 static arch_word*	help_get_reg			(arch_core*, arch_uint);
 static void 		help_push				(arch_word, arch_core*);
 static void			help_pop				(arch_core*);
@@ -587,9 +588,14 @@ static arch_word* help_get_reg(arch_core* core, arch_uint eff_reg)
 	}
 }
 
-static arch_byte* help_get_ram_addr(arch_addr address)
+arch_byte* help_get_ram_addr(arch_addr address)
 {
 	return (arch_byte*)&arch_memory + address;
+}
+
+arch_addr help_get_arch_addr(arch_byte* address)
+{
+	return(arch_addr)address - (arch_addr)arch_memory ;
 }
 
 static void help_push(arch_word value, arch_core* core)
