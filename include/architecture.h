@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+#include "instructions.h" // arch_instr needed for definition in arch_core
+//include <pthread.h>	// pthread_t needed for definition of arch_core
+
+>>>>>>> Beginning Work on dispatch.c and dispatch.h
 #ifndef VMOS_ARCH_H
 #define VMOS_ARCH_H
 

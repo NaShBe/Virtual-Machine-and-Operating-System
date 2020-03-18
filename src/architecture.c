@@ -20,7 +20,7 @@
 #include "process.h"
 #include <stddef.h>		/* for NULL */
 #include <stdlib.h>		/* for malloc */
-#include <pthread.h>	/* for threading of core and DMA processes */
+//include <pthread.h>	/* for threading of core and DMA processes */
 
 
 volatile arch_byte		arch_memory[RAM_SIZE * ARCH_WORD_SIZE];

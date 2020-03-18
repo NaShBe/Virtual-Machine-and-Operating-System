@@ -12,10 +12,16 @@
 typedef enum
 {
     running,
+    suspended,
     exit_success,
+<<<<<<< HEAD
     exit_failure,
     loaded,
     suspended
+=======
+    exit_failure
+    
+>>>>>>> Beginning Work on dispatch.c and dispatch.h
 } status_enum;                      /* used by the OS for scheduling, error handling, and unloading */
 
 typedef struct
