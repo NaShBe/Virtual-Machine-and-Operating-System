@@ -16,15 +16,16 @@
 #include "architecture.h"
 #include "instructions.h"
 #include "handler.h"
+#include "process.h"
 #include <stddef.h>		/* for NULL */
 #include <stdlib.h>		/* for malloc */
 #include <pthread.h>	/* for threading of core and DMA processes */
 
 
-volatile arch_byte	arch_memory[RAM_SIZE * ARCH_WORD_SIZE];
-static arch_dma		core_dma_cont;
-static arch_uint	core_amount;
-static arch_bool	has_bus_control;
+volatile arch_byte		arch_memory[RAM_SIZE * ARCH_WORD_SIZE];
+static arch_dma*		core_dma_cont = NULL;
+static arch_uint		core_amount;
+static arch_bool		has_bus_control;
 static const arch_interrupt_table const* intrpt_vector = &arch_memory + INTRPT_OFFSET;
 
 
@@ -111,9 +112,38 @@ void thread(arch_core* core, arch_addr entry)
 
 }
 
-arch_addr connect_dma(arch_device* device)
+void thread_cache(vmos_pcb* process)
 {
 	
+}
+
+arch_addr connect_dma(arch_device* device)
+{
+	if (core_dma_cont == NULL)
+	{
+		core_dma_cont = malloc(sizeof(arch_dma));
+		if (core_dma_cont == NULL)
+		{
+			send_error(bad_malloc);
+		}
+		core_dma_cont->devices = malloc(sizeof(arch_device) * CORE_MAX_DEVICES);
+		if(core_dma_cont->devices == NULL)
+		{
+			send_error(bad_malloc);
+		}
+	}
+	if (core_dma_cont->device_count >= CORE_MAX_DEVICES)
+	{
+		printf("Max devices reached, device not connected.");
+		return 0;
+	}
+	else
+	{
+		core_dma_cont->devices[core_dma_cont->device_count] = device;
+		core_dma_cont->device_count++;
+		device->address = core_dma_cont->device_count;
+		return core_dma_cont->device_count;
+	}
 }
 
 void step (arch_core* core)

@@ -1,6 +1,8 @@
 #include "architecture.h"
-#include "parse.h"
+#include "harddrive.h"
 
-static parse_jobs jobs;
+void load_job()
+{
 
+}
 

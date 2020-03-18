@@ -221,7 +221,7 @@ job_list* parse_file(const char* path)
                             r1 = (instr_word & BITFIELD_OPRAND1) >> BITOFFSET_OPRAND1;
                             r2 = (instr_word & BITFIELD_OPRAND2) >> BITOFFSET_OPRAND2;
                             data = instr_word & BITFIELD_ADDRESS;
-                            instr_list->instructions[i].data = (cond_imm_data){.breg = r1, .dreg = r2, .addr = data}.int_rep;
+                            instr_list->instructions[i].data = (cond_imm_data){.breg = r2, .dreg = r1, .addr = data}.int_rep;
                             break;
                         case FORMAT_UJF:
                             instr_list->instructions[i].data = instr_word & !(BITFIELD_FORMAT | BITFIELD_OPCODE);

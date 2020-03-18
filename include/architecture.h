@@ -40,6 +40,7 @@
 #define CORE_PARALLEL 0		// This establishes if instruction pipelining happens.
 #define CORE_STEPS    3		// This is how many steps are taken to complete one CPU instruction (fetching, decoding, executing)
 #define CORE_EXE_STEP CORE_STEPS - 1
+#define CORE_MAX_DEVICES	1
 // NOTE: execution step must always be the last step (probably not true now)
 
 #ifdef __WIN32
@@ -140,6 +141,7 @@ struct a_d
 struct a_dma
 {
 	arch_dma_registers* registers;
+	arch_uint			device_count;
 	arch_device**       devices;
 	arch_addr			active_device;
 	const arch_word    	size;

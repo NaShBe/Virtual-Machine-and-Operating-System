@@ -3,6 +3,7 @@
 
 #include "architecture.h"
 #include "instructions.h"
+#include "parse.h"
 
 typedef struct
 {
@@ -13,7 +14,6 @@ typedef struct
 {
     arch_byte*      storage;
     arch_uint       file_count;
-    arch_uint       file_capacity;
     drive_file**    files;
 } arch_files;
 
@@ -33,5 +33,9 @@ typedef struct
     arch_uint   data_part;
     arch_word*  data_buff;
 } drive_file;
+
+extern void         init_drive(arch_drive* drive);
+extern void         write_to_disc(arch_drive* drive, job_list* jobs);
+extern drive_file*  get_file(arch_drive* drive, arch_uint fd);
 
 #endif
