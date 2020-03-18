@@ -10,8 +10,9 @@ typedef enum
     running,
     suspended,
     exit_success,
-    exit_failure
-    
+    exit_failure,
+    loaded,
+    suspended
 } status_enum;                      /* used by the OS for scheduling, error handling, and unloading */
 
 typedef struct

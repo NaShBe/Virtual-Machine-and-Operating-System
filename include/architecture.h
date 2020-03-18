@@ -102,7 +102,7 @@ typedef struct
 	arch_pipe_func	pipeline[CORE_STEPS];
 	arch_word       cycle_count;
 	arch_bool       is_enabled_intrpt;
-	pthread_t		thread;
+	//pthread_t		thread;
 } arch_core;
 
 typedef struct
