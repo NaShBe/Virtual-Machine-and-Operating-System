@@ -18,7 +18,11 @@ typedef struct
 
 extern process_list loaded_processes;
 
+<<<<<<< HEAD
 void load_process();
 >>>>>>> working on code to adapt new IO
+=======
+vmos_pcb* load_process();
+>>>>>>> scheduler
 
 #endif

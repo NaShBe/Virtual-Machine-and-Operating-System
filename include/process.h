@@ -8,6 +8,8 @@
 typedef enum
 {
     running,
+    ready,
+    wait,
     exit_success,
     exit_failure,
     loaded,
