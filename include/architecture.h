@@ -1,5 +1,5 @@
 #include "instructions.h" // arch_instr needed for definition in arch_core
-#include <pthread.h>	// pthread_t needed for definition of arch_core
+//include <pthread.h>	// pthread_t needed for definition of arch_core
 
 #ifndef VMOS_ARCH_H
 #define VMOS_ARCH_H
