@@ -1,4 +1,3 @@
-#include "architecture.h"
 #include "handler.h"
 #include "parse.h"
 #include "harddrive.h"

@@ -124,7 +124,7 @@ typedef struct
 	arch_bool       is_enabled_intrpt;
 	arch_thread		thread;
 	arch_byte*		cache[50];
-};
+} arch_core;
 
 typedef struct
 {

@@ -4,9 +4,9 @@
 
 #include "archE.h"
 #include "architecture.h"
+#include "process.h"
 
-extern void dispatch(arch_core*,vmos_pcb );
-
+extern status_enum give_program_to_cpu(arch_core*, vmos_pcb*);
 
 
 #endif 

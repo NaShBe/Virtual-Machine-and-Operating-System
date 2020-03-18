@@ -5,6 +5,7 @@
 #include "harddrive.h"
 #include "vmos.h"           // needed for vmos_uint
 
+
 typedef enum
 {
     running,
