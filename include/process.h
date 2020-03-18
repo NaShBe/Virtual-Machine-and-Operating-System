@@ -9,6 +9,7 @@
 #include "vmos.h"           // needed for vmos_uint
 #include "architecture.h"   // needed for arch_registers
 
+
 typedef enum
 {
     running,

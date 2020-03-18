@@ -122,6 +122,7 @@ struct a_alu
 
 struct a_c
 {
+<<<<<<< HEAD
 	arch_uint			id;
 	arch_registers  	regs;
 	arch_alu        	alu;
@@ -132,6 +133,17 @@ struct a_c
 	struct vmos_pcb*	pcb_reference;
 	arch_byte*			cache[50];
 };
+=======
+	arch_uint		id;
+	arch_registers  regs;
+	arch_alu        alu;
+	arch_pipe_func	pipeline[CORE_STEPS];
+	arch_word       cycle_count;
+	arch_bool       is_enabled_intrpt;
+	arch_thread		thread;
+	arch_byte*		cache[50];
+} arch_core;
+>>>>>>> small edits
 
 struct a_dma_r
 {

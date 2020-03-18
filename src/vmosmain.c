@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 #include "vmos.h"
 #include "architecture.h"
+=======
+>>>>>>> small edits
 #include "handler.h"
 #include "parse.h"
 #include "harddrive.h"
