@@ -8,6 +8,7 @@
 typedef enum
 {
     running,
+    ready,
     exit_success,
     exit_failure
 } status_enum;                      /* used by the OS for scheduling, error handling, and unloading */

@@ -12,6 +12,6 @@ typedef struct
 
 extern process_list loaded_processes;
 
-void load_process();
+vmos_pcb* load_process();
 
 #endif
