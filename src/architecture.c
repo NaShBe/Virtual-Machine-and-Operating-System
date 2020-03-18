@@ -59,11 +59,12 @@ static void branch		(arch_core*);
 static void interrupt	(arch_core*);
 
 // helper functions
-static void       	help_write_to_mem	(arch_byte*, arch_uint, arch_addr);
-static arch_byte*	help_get_ram_addr	(arch_addr);
-static arch_word*	help_get_reg		(arch_core*, arch_uint);
-static void 		help_push			(arch_word, arch_core*);
-static void			help_pop			(arch_core*);
+void       			help_write_to_mem		(arch_byte*, arch_uint, arch_addr);
+void 				help_write_to_mem_word	(arch_word*, arch_addr);
+static arch_byte*	help_get_ram_addr		(arch_addr);
+static arch_word*	help_get_reg			(arch_core*, arch_uint);
+static void 		help_push				(arch_word, arch_core*);
+static void			help_pop				(arch_core*);
 
 arch_core* init_core_default()
 {
@@ -540,7 +541,7 @@ static void interrupt(arch_core* core)
 
 /*		HELPER FUNCTIONS		*/
 
-static void help_write_to_mem(arch_byte* data, arch_uint size, arch_addr addr)
+void help_write_to_mem(arch_byte* data, arch_uint size, arch_addr addr)
 {
 	arch_byte* offset = &(arch_memory[addr]);
 	arch_uint count = 0;
@@ -558,9 +559,9 @@ static void help_write_to_mem(arch_byte* data, arch_uint size, arch_addr addr)
 	}
 }
 
-static void help_write_to_mem(arch_word word, arch_addr addr)
+void help_write_to_mem_word(arch_word* word, arch_addr addr)
 {
-	help_write_to_mem((arch_byte*)&word, ARCH_WORD_SIZE, addr);
+	help_write_to_mem((arch_byte*)word, ARCH_WORD_SIZE, addr);
 }
 
 static arch_word* help_get_reg(arch_core* core, arch_uint eff_reg)

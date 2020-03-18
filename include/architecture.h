@@ -152,10 +152,14 @@ struct a_dma
 
 extern volatile arch_byte arch_memory[RAM_SIZE * ARCH_WORD_SIZE];
 
-extern arch_core*   init_core_default   ();                         /* will initialize a core for use in cycle() */
-extern arch_core*   init_core   		(arch_registers*, arch_pipe_func*, arch_addr);
-extern void         cycle       		(arch_core**, arch_uint);   /* will cycles through every core in the list */
-extern void         thread      		(arch_core*, arch_addr);    /* will jump core into process entry point*/
-extern arch_addr    connect_dma 		(arch_device*);				/* connects a device and provides the address for programming */
+extern arch_core*   init_core_default   	();                         /* will initialize a core for use in cycle() */
+extern arch_core*   init_core   			(arch_registers*, arch_pipe_func*, arch_addr);
+extern void         cycle       			(arch_core**, arch_uint);   /* will cycles through every core in the list */
+extern void         thread      			(arch_core*, arch_addr);    /* will jump core into process entry point*/
+extern arch_addr    connect_dma 			(arch_device*);				/* connects a device and provides the address for programming */
+
+extern void			help_write_to_mem		(arch_byte*, arch_uint, arch_addr);
+extern void 		help_write_to_mem_word	(arch_word*, arch_addr);
+
 
 #endif /* architecture.h */

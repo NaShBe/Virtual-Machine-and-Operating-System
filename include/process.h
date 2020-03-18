@@ -30,6 +30,13 @@ typedef struct                      /* every loaded program must have a pcb atta
     const arch_instr    rtend;          /* this is where the cpu will hang until it is redirected by the dispatcher */
 } vmos_pcb;
 
+typedef struct
+{
+    vmos_uint count;
+    vmos_uint capacity;
+    vmos_pcb** list;
+} vmos_pcb_list;
+
 
 
 #endif
