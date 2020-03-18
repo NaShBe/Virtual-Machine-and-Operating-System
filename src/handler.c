@@ -16,13 +16,13 @@ static char* error_filename = NULL;
 static char* error_line = NULL;
 static int error_intern_line = 0;
 
-inline void init_error();
+void init_error();
 void signal_abort(error_type_enum, char*, int);
 static void abort_handle();
 static char* help_errorln_itoa(int);
 static void internal_error();
 
-inline void init_error()
+void init_error()
 {
     signal(SIGABRT, abort_handle);
 }
@@ -53,34 +53,34 @@ static void abort_handle()
     switch(error_type)
     {
         case bad_malloc:
-            fprintf(stderr, "important data memory not allocated, aborting...\n%s: %s", error_filename, error_line);
+            fprintf(stderr, "important data memory not allocated, aborting...\n%s: %s\n", error_filename, error_line);
             break;
         case core_pipeline_corruption:
-            fprintf(stderr, "Pipeline corrupted, aborting...\n%s: %s", error_filename, error_line);
+            fprintf(stderr, "Pipeline corrupted, aborting...\n%s: %s\n", error_filename, error_line);
             break;
         case ram_filled:
-            fprintf(stderr, "RAM filled, aborting...\n%s: %s", error_filename, error_line);
+            fprintf(stderr, "RAM filled, aborting...\n%s: %s\n", error_filename, error_line);
             break;
         case ram_outbounds:
-            fprintf(stderr, "address request out of bounds of RAM, aborting...\n%s: %s", error_filename, error_line);
+            fprintf(stderr, "address request out of bounds of RAM, aborting...\n%s: %s\n", error_filename, error_line);
             break;
         case reg_invalid:
-            fprintf(stderr, "Invalid register input/register not available, aborting...\n%s: %s", error_filename, error_line);
+            fprintf(stderr, "Invalid register input/register not available, aborting...\n%s: %s\n", error_filename, error_line);
             break;
         case disc_not_attached:
-            fprintf(stderr, "No storage device attached, aborting...\n%s: %s", error_filename, error_line);
+            fprintf(stderr, "No storage device attached, aborting...\n%s: %s\n", error_filename, error_line);
             break;
         case disc_corruption:
-            fprintf(stderr, "Disc data corrupted and cannot be read, aborting...\n%s: %s", error_filename, error_line);
+            fprintf(stderr, "Disc data corrupted and cannot be read, aborting...\n%s: %s\n", error_filename, error_line);
             break;
         case parser_file_error:
-            fprintf(stderr, "VMOS could not read the input file, aborting...\n%s: %s", error_filename, error_line);
+            fprintf(stderr, "VMOS could not read the input file, aborting...\n%s: %s\n", error_filename, error_line);
             break;
         case file_no_input:
-            fprintf(stderr, "No input detected. Please provide an input file before running VMOS.");
+            fprintf(stderr, "No input detected. Please provide an input file before running VMOS.\n");
             break;
         default:
-            fprintf(stderr, "Unspecified error, aborting....\n%s: %s", error_filename, error_line);
+            fprintf(stderr, "Unspecified error, aborting....\n%s: %s\n", error_filename, error_line);
     }
     exit(EXIT_FAILURE);
 }

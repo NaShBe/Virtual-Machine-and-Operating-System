@@ -3,13 +3,15 @@
 
 // Format Defines
 // first two bits of instruction, determines type
-#define SIZE_FORMAT 2
-#define FORMAT_AIF  0x00	// Arithmatic Instruction Format
-#define FORMAT_CBIF 0x01	// Conditional Branch & Immediate Instruction Format
-#define FORMAT_UJF  0x02	// Unconditional Jump Format
-#define FORMAT_IOIF 0x03	// I/O Instruction Format
+#define SIZE_FORMAT 	2
+#define OFFSET_FORMAT	0
+#define FORMAT_AIF  	0x00	// Arithmatic Instruction Format
+#define FORMAT_CBIF 	0x01	// Conditional Branch & Immediate Instruction Format
+#define FORMAT_UJF  	0x02	// Unconditional Jump Format
+#define FORMAT_IOIF 	0x03	// I/O Instruction Format
 
-#define SIZE_OPCODE 4
+#define SIZE_OPCODE 	6
+#define OFFSET_OPCODE	4
 #define RD   0x00	// Load contents of input buffer into the accumulator
 #define WR   0x01	// Write the contents of accumulator into output buffer
 #define ST   0x02	// Store contents of a register into RAM
@@ -39,53 +41,62 @@
 #define BLZ  0x1A	// Branch to an address if
 #define SWE  0x1B	// Software Interrupt
 
-#define BITFIELD_FORMAT 	0xC0000000
-#define BITOFFSET_FORMAT	30
-#define BITFIELD_OPCODE		0x3C000000
-#define BITOFFSET_OPCODE	26
+#define SIZE_DATA 24
+
+#define BITFIELD_FORMAT 		0xC0000000
+#define BITOFFSET_FORMAT		30
+#define BITFIELD_OPCODE			0x3F000000
+#define BITOFFSET_OPCODE		24
+#define BITFIELD_OPRAND1		0x00F00000
+#define BITFIELD_OPRAND2		0x000F0000
+#define BITFIELD_OPRAND3		0x0000F000
+#define BITFIELD_ADDRESS		0x0000FFFF
+#define BITFIELD_ARITHZERO		0x00000FFF
+
+#include "architecture.h" // for arch_uint
 
 typedef union
 {
-	unsigned int int_rep;
+	arch_uint int_rep;
 	struct
 	{
-		unsigned int format: 2;
-		unsigned int opcode: 6;
-		unsigned int data:  24;
+		arch_uint format: 2;
+		arch_uint opcode: 6;
+		arch_uint data:  24;
 	};
 } arch_instr;
 
 typedef union
 {
-	unsigned int int_rep: 24;		// uint-compatable representation
+	arch_uint int_rep: 24;		// uint-compatable representation
 	struct
 	{
-		unsigned int src1: 4;	
-		unsigned int src2: 4;
-		unsigned int dest: 4;
-		const unsigned int zr: 12;	// the last 12 bits must be zero
+		arch_uint src1: 4;	
+		arch_uint src2: 4;
+		arch_uint dest: 4;
+		const arch_uint zr: 12;	// the last 12 bits must be zero
 	};
 } arith_data;
 
 typedef union
 {
-	unsigned int int_rep: 24;		// uint-compatable representation
+	arch_uint int_rep: 24;		// uint-compatable representation
 	struct
 	{
-		unsigned int breg: 4;
-		unsigned int dreg: 4;
-		unsigned int addr: 16;
+		arch_uint breg: 4;
+		arch_uint dreg: 4;
+		arch_uint addr: 16;
 	};
 } cond_imm_data;
 
 typedef union
 {
-	unsigned int int_rep: 24;		// uint-compatable representation
+	arch_uint int_rep: 24;		// uint-compatable representation
 	struct
 	{
-		unsigned int reg1: 4;
-		unsigned int reg2: 4;
-		unsigned int addr: 16;
+		arch_uint reg1: 4;
+		arch_uint reg2: 4;
+		arch_uint addr: 16;
 	};
 } inp_out_data;
 

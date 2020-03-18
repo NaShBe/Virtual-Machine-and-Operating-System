@@ -1,6 +1,3 @@
-#include "instructions.h" // arch_instr needed for definition in arch_core
-#include <pthread.h>	// pthread_t needed for definition of arch_core
-
 #ifndef VMOS_ARCH_H
 #define VMOS_ARCH_H
 
@@ -12,10 +9,10 @@
 #define DISK_SIZE	2048
 #endif
 
-#define ARCH_BYTE_SIZE	sizeof(arch_byte)
-#define ARCH_HWORD_SIZE sizeof(arch_hword)
-#define ARCH_WORD_SIZE	sizeof(arch_word)
-#define ARCH_DWORD_SIZE sizeof(arch_dword)
+#define ARCH_BYTE_SIZE		sizeof(arch_byte)
+#define ARCH_HWORD_SIZE 	sizeof(arch_hword)
+#define ARCH_WORD_SIZE		sizeof(arch_word)
+#define ARCH_DWORD_SIZE 	sizeof(arch_dword)
 
 #define ARCH_INT_SIZE		sizeof(arch_int)
 #define ARCH_UINT_SIZE		sizeof(arch_uint)
@@ -45,20 +42,33 @@
 #define CORE_EXE_STEP CORE_STEPS - 1
 // NOTE: execution step must always be the last step (probably not true now)
 
-typedef unsigned char   arch_byte;
-typedef unsigned short  arch_hword;
-typedef unsigned int    arch_word;
-typedef unsigned long   arch_dword;
-typedef unsigned int    arch_addr;
-typedef char			arch_char;
-typedef unsigned char	arch_uchar;
-typedef int             arch_int;
-typedef unsigned int    arch_uint;
-typedef long            arch_long;
-typedef unsigned long   arch_ulong;
-typedef float           arch_float;
-typedef double          arch_double;
-typedef unsigned char   arch_bool;
+#include <pthread.h>	// pthread_t needed for definition of arch_core
+
+typedef unsigned char  			arch_byte;
+typedef unsigned short 			arch_hword;
+typedef unsigned int   			arch_word;
+typedef unsigned long  			arch_dword;
+typedef unsigned int   			arch_addr;
+typedef char					arch_char;
+typedef unsigned char			arch_uchar;
+typedef int            			arch_int;
+typedef unsigned int   			arch_uint;
+typedef long           			arch_long;
+typedef unsigned long  			arch_ulong;
+typedef float          			arch_float;
+typedef double         			arch_double;
+typedef unsigned char   		arch_bool;
+
+typedef struct a_r				arch_registers;
+typedef struct a_i_t			arch_interrupt_table;
+typedef struct a_alu			arch_alu;
+typedef struct a_c				arch_core;
+typedef struct a_dma_r			arch_dma_registers;
+typedef struct a_d				arch_device;
+typedef struct a_dma			arch_dma;
+
+#include "instructions.h"
+
 typedef void(* arch_pipe_func)(arch_core*);
 
 #undef TRUE
@@ -66,7 +76,7 @@ typedef void(* arch_pipe_func)(arch_core*);
 #define TRUE  1
 #define FALSE 0
 
-typedef struct 
+struct a_r
 {
 	arch_word   ac;				/* accumulator */
 	arch_word   zr;			    /* zero register */
@@ -75,26 +85,26 @@ typedef struct
 	arch_instr  ir;				/* instruction register */
 	arch_addr   sp;				/* stack pointer */
 	arch_addr   bp;				/* base pointer */
-} arch_registers;		/* instructions provide access to the CPU's 16 registers */
+};/* instructions provide access to the CPU's 16 registers */
 
-typedef struct
+struct a_i_t
 {
 	arch_instr reset;
 	arch_instr undefined;
 	arch_instr math;
 	arch_instr dma;
 	arch_instr software;
-} arch_interrupt_table;
+};
 
-typedef struct
+struct a_alu
 {
 	arch_word   oprand1;
 	arch_word   oprand2;
 	arch_word   instr;
 	arch_word*  output;
-} arch_alu;
+};
 
-typedef struct
+struct a_c
 {
 	arch_uint		id;
 	arch_registers  regs;
@@ -103,31 +113,33 @@ typedef struct
 	arch_word       cycle_count;
 	arch_bool       is_enabled_intrpt;
 	pthread_t		thread;
-} arch_core;
+};
 
-typedef struct
+struct a_dma_r
 {
 	arch_addr address;
 	arch_word count;
 	arch_word intrpt;
 	arch_word read;
 	arch_word write;
-} arch_dma_registers;
+};
 
-typedef struct
+struct a_d
+{
+	arch_addr address;
+	arch_addr* access;
+};
+
+struct a_dma
 {
 	arch_dma_registers* registers;
 	arch_device**       devices;
 	arch_addr			active_device;
 	const arch_word    	size;
 	arch_bool*			bus_access;
-} arch_dma;
+};
 
-typedef struct
-{
-	arch_addr address;
-	arch_addr* access;
-} arch_device;
+
 
 extern volatile arch_byte arch_memory[RAM_SIZE * ARCH_WORD_SIZE];
 

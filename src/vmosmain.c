@@ -17,8 +17,13 @@ int main(int argc, char** argv)
 
     if (argc > 2)
     {
-        
+        output_context(test_jobs, argv[2]);
     }
+    else
+    {
+        output_context(test_jobs, "output.txt");
+    }
+    
     
 
     /*
