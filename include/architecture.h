@@ -42,7 +42,13 @@
 #define CORE_EXE_STEP CORE_STEPS - 1
 // NOTE: execution step must always be the last step (probably not true now)
 
+#ifdef __WIN32
+#include <windows.h>
+typedef HANDLE arch_thread;
+#elif defined(__APPLE__) || defined(unix) || defined(__unix__) || defined(__unix)
 #include <pthread.h>	// pthread_t needed for definition of arch_core
+typedef pthread_t arch_thread;
+#endif
 
 typedef unsigned char  			arch_byte;
 typedef unsigned short 			arch_hword;
@@ -112,7 +118,7 @@ struct a_c
 	arch_pipe_func	pipeline[CORE_STEPS];
 	arch_word       cycle_count;
 	arch_bool       is_enabled_intrpt;
-	pthread_t		thread;
+	arch_thread		thread;
 };
 
 struct a_dma_r

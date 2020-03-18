@@ -12,7 +12,7 @@ typedef struct
 typedef struct
 {
     /* data */
-} arch_partition_table;
+} arch_files;
 
 typedef struct
 {

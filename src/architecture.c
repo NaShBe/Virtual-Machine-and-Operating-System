@@ -94,12 +94,16 @@ arch_core* init_core(arch_registers* regs_init, arch_pipe_func* pipeline, arch_a
 
 void cycle(arch_core** core_list, arch_uint core_list_size)
 {
+	#ifdef __WIN32
+	// code for windows threads
+	#elif defined(__APPLE__) || defined(unix) || defined(__unix__) || defined(__unix)
 	for (arch_int i = 0; i < core_list_size; i++)
 	{
 		arch_core* core = core_list[i];
 		pthread_create(&core->thread, NULL, step, core);
 		pthread_join(&core->thread, NULL);
 	}
+	#endif
 }
 
 void thread(arch_core* core, arch_addr entry)

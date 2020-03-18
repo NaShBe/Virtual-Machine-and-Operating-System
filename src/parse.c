@@ -20,6 +20,7 @@
 
 #define NO_NULL_STRING_MAX 10
 #define ASCII_OR_OFFSET    32
+#define MNEUMONIC_MAX      5
 
 static FILE* input_file = NULL;
 static FILE* context_file = NULL;
@@ -168,6 +169,8 @@ job_list* parse_file(const char* path)
                     help_add_to_job_list(jobs, new_job);
                     job = NULL;
                     data = NULL;
+                    instr_list = NULL;
+                    data_list = NULL;
                 }
             }
         }
@@ -200,12 +203,38 @@ job_list* parse_file(const char* path)
                     
                     instr_list->instructions[i].format = (instr_word & BITFIELD_FORMAT) >> BITOFFSET_FORMAT;
                     instr_list->instructions[i].opcode = (instr_word & BITFIELD_OPCODE) >> BITOFFSET_OPCODE;
-
-                    if(i == 0)
+                    arch_uint r1;
+                    arch_uint r2;
+                    arch_uint r3;
+                    arch_uint data;
+                    switch(instr_list->instructions[i].format)
                     {
-                        printf("instr_word: %x, int_rep: %x          format: %x, opcode: %x\n", instr_word, instr_list->instructions[i].int_rep, instr_list->instructions[i].format, instr_list->instructions[i].opcode); 
+                        case FORMAT_AIF:
+                            r1 = (instr_word & BITFIELD_OPRAND1) >> BITOFFSET_OPRAND1;
+                            r2 = (instr_word & BITFIELD_OPRAND2) >> BITOFFSET_OPRAND2;
+                            r3 = (instr_word & BITFIELD_OPRAND3) >> BITOFFSET_OPRAND3;
+                            data = 0;
+                            instr_list->instructions[i].data = (arith_data){.src1 = r1, .src2 = r2, .dest = r3, .zr = data}.int_rep;
+                            break;
+                        case FORMAT_CBIF:
+                            r1 = (instr_word & BITFIELD_OPRAND1) >> BITOFFSET_OPRAND1;
+                            r2 = (instr_word & BITFIELD_OPRAND2) >> BITOFFSET_OPRAND2;
+                            data = instr_word & BITFIELD_ADDRESS;
+                            instr_list->instructions[i].data = (cond_imm_data){.breg = r1, .dreg = r2, .addr = data}.int_rep;
+                            break;
+                        case FORMAT_UJF:
+                            instr_list->instructions[i].data = instr_word & !(BITFIELD_FORMAT | BITFIELD_OPCODE);
+                            break;
+                        case FORMAT_IOIF:
+                            r1 = (instr_word & BITFIELD_OPRAND1) >> BITOFFSET_OPRAND1;
+                            r2 = (instr_word & BITFIELD_OPRAND2) >> BITOFFSET_OPRAND2;
+                            data = instr_word & BITFIELD_ADDRESS;
+                            instr_list->instructions[i].data = (inp_out_data){.reg1 = r1, .reg2 = r2, .addr = data}.int_rep;
+                            break;
+                        default:
+                            send_error(parser_file_error);
                     }
-                    
+                    printf("instr_word: %x, int_rep: %x          format: %x, opcode: %x\n", instr_word, instr_list->instructions[i].int_rep, instr_list->instructions[i].format, instr_list->instructions[i].opcode); 
                 }
             }
 
@@ -252,47 +281,164 @@ void output_context(job_list* info, const arch_char* file)
     }
     for (arch_int i = 0; i < info->count; i++)
     {
-        fprintf(fp, "opcode: %i, priority of %i\n", i, info->jobs[i]->priority);
+        fprintf(fp, "// JOB: %i (0x%x) Priority: %i\n", i+1, i+1, info->jobs[i]->priority);
         for (arch_int j = 0; j < info->jobs[i]->instr_count; j++)
         {
-            if (info->jobs[i]->instructions[j].format == FORMAT_AIF) // If the format is arithmetic instruction 
-            { 
-                fprintf(fp, "#%i opcode: %i src1: %i, src2: %i, dest: %i\n", j,
-                        ((arch_instr)(info->jobs[i]->instructions[j])).opcode,
-                        ((arith_data)(info->jobs[i]->instructions[j].data)).src1,
-                        ((arith_data)(info->jobs[i]->instructions[j].data)).src2,
-                        ((arith_data)(info->jobs[i]->instructions[j].data)).dest);
-            }
-            if (info->jobs[i]->instructions[j].format == FORMAT_CBIF) // If the format is Conditional Branch & Immediate Instruction instruction 
+            arch_char* opcode_mneum;
+            arch_char* description;
+            switch (info->jobs[i]->instructions[j].opcode)
             {
-                fprintf(fp, "#%i Conditional Branch or Immediate opcode: %i breg: %i, dreg: %i, addr: %i\n", j,
-                        ((arch_instr)(info->jobs[i]->instructions[j])).opcode,
-                        ((cond_imm_data)(info->jobs[i]->instructions[j].data)).breg,
-                        ((cond_imm_data)(info->jobs[i]->instructions[j].data)).dreg,
-                        ((cond_imm_data)(info->jobs[i]->instructions[j].data)).addr);
+                case RD:
+                    opcode_mneum = "RD";
+                    description = "Reading";
+                    break;
+                case WR:
+                    opcode_mneum = "WR";
+                    description = "Writing";
+                    break;
+                case ST:
+                    opcode_mneum = "ST";
+                    description = "Storing content of register";
+                    break;
+                case LW:
+                    opcode_mneum = "LW";
+                    description = "Loading content of register";
+                    break;
+                case MOV:
+                    opcode_mneum = "MOV";
+                    description = "Moving content of register";
+                    break;
+                case ADD:
+                    opcode_mneum = "ADD";
+                    description = "Adding content of register";
+                    break;
+                case SUB:
+                    opcode_mneum = "SUB";
+                    description = "Subtracting content of register";
+                    break;
+                case MUL:
+                    opcode_mneum = "MUL";
+                    description = "Multiplying content of register";
+                    break;
+                case DIV:
+                    opcode_mneum = "DIV";
+                    description = "Dividing content of register";
+                    break;
+                case AND:
+                    opcode_mneum = "AND";
+                    description = "Perform logical AND between content of register";
+                    break;
+                case OR:
+                    opcode_mneum = "OR";
+                    description = "Perform logical OR between content of register";
+                    break;
+                case MOVI:
+                    opcode_mneum = "MOVI";
+                    description = "Move immediate value";
+                    break;
+                case ADDI:
+                    opcode_mneum = "ADDI";
+                    description = "Add immediate value";
+                    break;
+                case MULI:
+                    opcode_mneum = "MULI";
+                    description = "Multiply immediate value";
+                    break;
+                case DIVI:
+                    opcode_mneum = "DIVI";
+                    description = "Divide content of register";
+                    break;
+                case LDI:
+                    opcode_mneum = "LDI";
+                    description = "Load immediate value";
+                    break;
+                case SLT:
+                    opcode_mneum = "SLT";
+                    description = "Set content of register";
+                    break;
+                case SLTI:
+                    opcode_mneum = "SLTI";
+                    description = "Set content of register";
+                    break;
+                case HTL:
+                    opcode_mneum = "HTL";
+                    description = "Halt program, logical end";
+                    break;
+                case NOP:
+                    opcode_mneum = "NOP";
+                    description = "No operation";
+                    break;
+                case JMP:
+                    opcode_mneum = "JMP";
+                    description = "Jump to address";
+                    break;
+                case BEQ:
+                    opcode_mneum = "BEQ";
+                    description = "Branch to";
+                    break;
+                case BNE:
+                    opcode_mneum = "BNE";
+                    description = "Branch to";
+                    break;
+                case BEZ:
+                    opcode_mneum = "BEZ";
+                    description = "Branch to";
+                    break;
+                case BNZ:
+                    opcode_mneum = "BNZ";
+                    description = "Branch to";
+                    break;
+                case BGZ:
+                    opcode_mneum = "BGZ";
+                    description = "Branch to";
+                    break;
+                case BLZ:
+                    opcode_mneum = "BLZ";
+                    description = "Branch to";
+                    break;
+                case SWE:
+                    opcode_mneum = "SWE";
+                    description = "Software Interrupt";
+                    break;
             }
-            if (info->jobs[i]->instructions[j].format == FORMAT_UJF) // If the format is Unconditional Jump instruction 
+            
+            arch_uint r1;
+            arch_uint r2;
+            arch_uint r3;
+            arch_uint data;
+            switch(info->jobs[i]->instructions[j].format)
             {
-                fprintf(fp, "#%i opcode: %i data: %i\n", j,
-                        ((arch_instr)(info->jobs[i]->instructions[j])).opcode,
-                        ((arch_instr)(info->jobs[i]->instructions[j])).data);
-            }
-            if (info->jobs[i]->instructions[j].format == FORMAT_IOIF) // If the format is I/O instruction 
-            {
-                fprintf(fp, "#%i I/O opcode: %i: reg1: %i, reg2: %i, addr: %i\n", j,
-                        ((arch_instr)(info->jobs[i]->instructions[j])).opcode,
-                        ((inp_out_data)(info->jobs[i]->instructions[j].data)).reg1,
-                        ((inp_out_data)(info->jobs[i]->instructions[j].data)).reg2,
-                        ((inp_out_data)(info->jobs[i]->instructions[j].data)).addr);
+                case FORMAT_AIF:
+                    r1 = ((arith_data)(info->jobs[i]->instructions[j].data)).src1;
+                    r2 = ((arith_data)(info->jobs[i]->instructions[j].data)).src2;
+                    r3 = ((arith_data)(info->jobs[i]->instructions[j].data)).dest;
+                    fprintf(fp, "%i: %s Rs%i Rs%i Rd%i\t\t// %s\n", j+1, opcode_mneum, r1, r2, r3, description);
+                    break;
+                case FORMAT_CBIF:
+                    r1 = ((cond_imm_data)(info->jobs[i]->instructions[j].data)).breg;
+                    r2 = ((cond_imm_data)(info->jobs[i]->instructions[j].data)).dreg;
+                    data = ((cond_imm_data)(info->jobs[i]->instructions[j].data)).addr;
+                    fprintf(fp, "%i: %s Rb%i Rd%i 0x%x\t\t// %s\n", j+1, opcode_mneum, r1, r2, data, description);
+                    break;
+                case FORMAT_UJF:
+                    data = info->jobs[i]->instructions[j].data;
+                    fprintf(fp, "%i: %s 0x%x\t\t// %s\n", j+1, opcode_mneum, data, description);
+                    break;
+                case FORMAT_IOIF:
+                    r1 = ((inp_out_data)(info->jobs[i]->instructions[j].data)).reg1;
+                    r2 = ((inp_out_data)(info->jobs[i]->instructions[j].data)).reg2;
+                    data = ((inp_out_data)(info->jobs[i]->instructions[j].data)).addr;
+                    fprintf(fp, "%i: %s Rs%i Rs%i 0x%x\t\t// %s\n", j+1, opcode_mneum, r1, r2, data, description);
+                    break;
             }
         }
         
-        fprintf(fp, "end of instructions \n data: \n");
+        fprintf(fp, "// DATA for Job %i:\n", i+1);
         for (arch_int k = 0; k < info->jobs[i]->data_count; k++) 
         {
-            fprintf(fp, "#%i %i", k, ((arch_word)info->jobs[i]->data[k]));
+            fprintf(fp, "%i: %i\n", k+1, ((arch_word)info->jobs[i]->data[k]));
         }
-        fprintf(fp, "end of job #%i\n\n", i);      
+        fprintf(fp, "// END of Job #%i\n", i+1);      
     }
     fclose(fp);
 }
