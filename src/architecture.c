@@ -16,15 +16,16 @@
 #include "architecture.h"
 #include "instructions.h"
 #include "handler.h"
+#include "process.h"
 #include <stddef.h>		/* for NULL */
 #include <stdlib.h>		/* for malloc */
 //include <pthread.h>	/* for threading of core and DMA processes */
 
 
-volatile arch_byte	arch_memory[RAM_SIZE * ARCH_WORD_SIZE];
-static arch_dma		core_dma_cont;
-static arch_uint	core_amount;
-static arch_bool	has_bus_control;
+volatile arch_byte		arch_memory[RAM_SIZE * ARCH_WORD_SIZE];
+static arch_dma*		core_dma_cont = NULL;
+static arch_uint		core_amount;
+static arch_bool		has_bus_control;
 static const arch_interrupt_table const* intrpt_vector = &arch_memory + INTRPT_OFFSET;
 
 
@@ -58,11 +59,13 @@ static void branch		(arch_core*);
 static void interrupt	(arch_core*);
 
 // helper functions
-static void       	help_write_to_mem	(arch_byte*, arch_uint, arch_addr);
-static arch_byte*	help_get_ram_addr	(arch_addr);
-static arch_word*	help_get_reg		(arch_core*, arch_uint);
-static void 		help_push			(arch_word, arch_core*);
-static void			help_pop			(arch_core*);
+void       			help_write_to_mem		(arch_byte*, arch_uint, arch_addr);
+void 				help_write_to_mem_word	(arch_word*, arch_addr);
+arch_byte*			help_get_ram_addr		(arch_addr);
+arch_addr			help_get_arch_addr		(arch_byte*);
+static arch_word*	help_get_reg			(arch_core*, arch_uint);
+static void 		help_push				(arch_word, arch_core*);
+static void			help_pop				(arch_core*);
 
 arch_core* init_core_default()
 {
@@ -94,12 +97,16 @@ arch_core* init_core(arch_registers* regs_init, arch_pipe_func* pipeline, arch_a
 
 void cycle(arch_core** core_list, arch_uint core_list_size)
 {
+	#ifdef __WIN32
+	// code for windows threads
+	#elif defined(__APPLE__) || defined(unix) || defined(__unix__) || defined(__unix)
 	for (arch_int i = 0; i < core_list_size; i++)
 	{
 		arch_core* core = core_list[i];
 		pthread_create(&core->thread, NULL, step, core);
 		pthread_join(&core->thread, NULL);
 	}
+	#endif
 }
 
 void thread(arch_core* core, arch_addr entry)
@@ -107,9 +114,38 @@ void thread(arch_core* core, arch_addr entry)
 
 }
 
-arch_addr connect_dma(arch_device* device)
+void thread_cache(vmos_pcb* process)
 {
 	
+}
+
+arch_addr connect_dma(arch_device* device)
+{
+	if (core_dma_cont == NULL)
+	{
+		core_dma_cont = malloc(sizeof(arch_dma));
+		if (core_dma_cont == NULL)
+		{
+			send_error(bad_malloc);
+		}
+		core_dma_cont->devices = malloc(sizeof(arch_device) * CORE_MAX_DEVICES);
+		if(core_dma_cont->devices == NULL)
+		{
+			send_error(bad_malloc);
+		}
+	}
+	if (core_dma_cont->device_count >= CORE_MAX_DEVICES)
+	{
+		printf("Max devices reached, device not connected.");
+		return 0;
+	}
+	else
+	{
+		core_dma_cont->devices[core_dma_cont->device_count] = device;
+		core_dma_cont->device_count++;
+		device->address = core_dma_cont->device_count;
+		return core_dma_cont->device_count;
+	}
 }
 
 void step (arch_core* core)
@@ -506,7 +542,7 @@ static void interrupt(arch_core* core)
 
 /*		HELPER FUNCTIONS		*/
 
-static void help_write_to_mem(arch_byte* data, arch_uint size, arch_addr addr)
+void help_write_to_mem(arch_byte* data, arch_uint size, arch_addr addr)
 {
 	arch_byte* offset = &(arch_memory[addr]);
 	arch_uint count = 0;
@@ -524,9 +560,9 @@ static void help_write_to_mem(arch_byte* data, arch_uint size, arch_addr addr)
 	}
 }
 
-static void help_write_to_mem(arch_word word, arch_addr addr)
+void help_write_to_mem_word(arch_word* word, arch_addr addr)
 {
-	help_write_to_mem((arch_byte*)&word, ARCH_WORD_SIZE, addr);
+	help_write_to_mem((arch_byte*)word, ARCH_WORD_SIZE, addr);
 }
 
 static arch_word* help_get_reg(arch_core* core, arch_uint eff_reg)
@@ -552,9 +588,14 @@ static arch_word* help_get_reg(arch_core* core, arch_uint eff_reg)
 	}
 }
 
-static arch_byte* help_get_ram_addr(arch_addr address)
+arch_byte* help_get_ram_addr(arch_addr address)
 {
 	return (arch_byte*)&arch_memory + address;
+}
+
+arch_addr help_get_arch_addr(arch_byte* address)
+{
+	return(arch_addr)address - (arch_addr)arch_memory ;
 }
 
 static void help_push(arch_word value, arch_core* core)

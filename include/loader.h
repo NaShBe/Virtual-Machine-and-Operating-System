@@ -1,17 +1,11 @@
 #ifndef VMOS_LOADER_H
 #define VMOS_LOADER_H
 
-#include "vmos.h"
+#include "process.h"
 
-typedef struct
-{
-    vmos_pcb* processes;
-    vmos_uint count;
-    vmos_uint capacity;
-} process_list;
+extern vmos_pcb_list* loaded_processes;
+extern vmos_pcb_list* unloaded_processes;
 
-extern process_list loaded_processes;
-
-void load_process();
-
+extern void get_jobs(arch_drive*);
+extern void output_loader(vmos_char*);
 #endif

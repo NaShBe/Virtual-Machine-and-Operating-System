@@ -43,22 +43,42 @@
 #define CORE_PARALLEL 0		// This establishes if instruction pipelining happens.
 #define CORE_STEPS    3		// This is how many steps are taken to complete one CPU instruction (fetching, decoding, executing)
 #define CORE_EXE_STEP CORE_STEPS - 1
+#define CORE_MAX_DEVICES	1
 // NOTE: execution step must always be the last step (probably not true now)
 
-typedef unsigned char   arch_byte;
-typedef unsigned short  arch_hword;
-typedef unsigned int    arch_word;
-typedef unsigned long   arch_dword;
-typedef unsigned int    arch_addr;
-typedef char			arch_char;
-typedef unsigned char	arch_uchar;
-typedef int             arch_int;
-typedef unsigned int    arch_uint;
-typedef long            arch_long;
-typedef unsigned long   arch_ulong;
-typedef float           arch_float;
-typedef double          arch_double;
-typedef unsigned char   arch_bool;
+#ifdef __WIN32
+#include <windows.h>
+typedef HANDLE arch_thread;
+#elif defined(__APPLE__) || defined(unix) || defined(__unix__) || defined(__unix)
+#include <pthread.h>	// pthread_t needed for definition of arch_core
+typedef pthread_t arch_thread;
+#endif
+
+typedef unsigned char  			arch_byte;
+typedef unsigned short 			arch_hword;
+typedef unsigned int   			arch_word;
+typedef unsigned long  			arch_dword;
+typedef unsigned int   			arch_addr;
+typedef char					arch_char;
+typedef unsigned char			arch_uchar;
+typedef int            			arch_int;
+typedef unsigned int   			arch_uint;
+typedef long           			arch_long;
+typedef unsigned long  			arch_ulong;
+typedef float          			arch_float;
+typedef double         			arch_double;
+typedef unsigned char   		arch_bool;
+
+typedef struct a_r				arch_registers;
+typedef struct a_i_t			arch_interrupt_table;
+typedef struct a_alu			arch_alu;
+typedef struct a_c				arch_core;
+typedef struct a_dma_r			arch_dma_registers;
+typedef struct a_d				arch_device;
+typedef struct a_dma			arch_dma;
+
+#include "instructions.h"
+
 typedef void(* arch_pipe_func)(arch_core*);
 
 #undef TRUE
@@ -102,8 +122,9 @@ typedef struct
 	arch_pipe_func	pipeline[CORE_STEPS];
 	arch_word       cycle_count;
 	arch_bool       is_enabled_intrpt;
-	//pthread_t		thread;
-} arch_core;
+	arch_thread		thread;
+	arch_byte*		cache[50];
+};
 
 typedef struct
 {
@@ -117,6 +138,7 @@ typedef struct
 typedef struct
 {
 	arch_dma_registers* registers;
+	arch_uint			device_count;
 	arch_device**       devices;
 	arch_addr			active_device;
 	const arch_word    	size;
@@ -131,11 +153,17 @@ typedef struct
 
 extern volatile arch_byte arch_memory[RAM_SIZE * ARCH_WORD_SIZE];
 
-extern arch_core*   init_core_default   ();                         /* will initialize a core for use in cycle() */
-extern arch_core*   init_core   		(arch_registers*, arch_pipe_func*, arch_addr);
-extern void         cycle       		(arch_core**, arch_uint);   /* will cycles through every core in the list */
-extern void         thread      		(arch_core*, arch_addr);    /* will jump core into process entry point*/
-extern arch_addr    connect_dma 		(arch_device*);				/* connects a device and provides the address for programming */
+extern arch_core*   init_core_default   	();                         /* will initialize a core for use in cycle() */
+extern arch_core*   init_core   			(arch_registers*, arch_pipe_func*, arch_addr);
+extern void         cycle       			(arch_core**, arch_uint);   /* will cycles through every core in the list */
+extern void         thread      			(arch_core*, arch_addr);    /* will jump core into process entry point*/
+extern arch_addr    connect_dma 			(arch_device*);				/* connects a device and provides the address for programming */
+
+extern void			help_write_to_mem		(arch_byte*, arch_uint, arch_addr);
+extern void 		help_write_to_mem_word	(arch_word*, arch_addr);
+arch_byte*			help_get_ram_addr		(arch_addr);
+arch_addr			help_get_arch_addr		(arch_byte*);
+
 
 extern void			write_to_memory		();							/* utility to write directly onto memory (USE SPARINGLY) */
 
