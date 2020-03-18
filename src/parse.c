@@ -36,6 +36,7 @@ arch_char* help_to_lower_string(arch_char* string);
 
 job_list* parse_file(const char* path)
 {
+    printf("Parsing file...");
     if (path != NULL)
     {
         read_file(path);
@@ -441,6 +442,7 @@ void output_context(job_list* info, const arch_char* file)
         fprintf(fp, "// END of Job #%i\n", i+1);      
     }
     fclose(fp);
+    printf("Parsing done.");
 }
 
 void read_file(const char* path)

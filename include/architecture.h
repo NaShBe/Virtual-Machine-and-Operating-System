@@ -119,6 +119,7 @@ struct a_c
 	arch_word       cycle_count;
 	arch_bool       is_enabled_intrpt;
 	arch_thread		thread;
+	arch_byte*		cache[50];
 };
 
 struct a_dma_r

@@ -1,50 +1,24 @@
 #include "architecture.h"
 #include "handler.h"
+#include "parse.h"
+#include "harddrive.h"
 #include <stddef.h> // for NULL
 #include <stdio.h>  // to save/load hard drive
 #include <stdlib.h> // for malloc()
 
-typedef struct
+void write_to_disc(arch_drive* drive, job_list* jobs)
 {
-    /* data */
-} arch_disk_controller;
-
-typedef struct
-{
-    /* data */
-} arch_files;
-
-typedef struct
-{
-    arch_byte   storage[DISK_SIZE * 4];
-    arch_device device;
-} arch_drive;
-
-typedef struct
-{
-    arch_byte*  data;
-    arch_uint   size;
-} drive_file;
-
-
-arch_device* access_drive(const char* path)
-{
-    FILE* disc_file = NULL;
-    disc_file = fopen(path, "r");
-    if (disc_file == NULL)
+    arch_uint file_count = jobs->count;
+    for (arch_uint i = 0; i < file_count; i++)
     {
-        send_error(disc_not_attached);
+        drive_file* new_file = malloc(sizeof(drive_file));
+
+        jobs->jobs[i];
     }
-    drive_file* full_file = malloc(sizeof(drive_file));
-}
-
-arch_bool write_to_disc(arch_drive* drive, const char* filename)
-{
     return FALSE;
 }
 
-arch_bool write_to_disc(arch_drive* drive, FILE* file)
+drive_file* get_file(arch_drive* drive, arch_uint fd)
 {
-    return FALSE;
+    return drive->file_system.files[fd];
 }
-
