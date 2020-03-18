@@ -7,7 +7,7 @@
 
 extern void dispatch(arch_core*,vmos_pcb );
 
-void store_program()
+
 
 #endif 
 

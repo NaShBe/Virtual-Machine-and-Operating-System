@@ -6,8 +6,6 @@
 #include "vmos.h"
 #include "architecture.h"
 
-vmos_pcb* outbound_process;
-
 /** on detect process finished halt or context switch **\
  * set outbound process pcb to current cpu information
  * set outbound process pcb status to exit_successful
@@ -41,6 +39,7 @@ void store_process_info(arch_core* core, vmos_pcb* outbound_process)
     {
         //dont store anything
         //signal to loader that memory is free
+       // free(&(outbound_process->vmos_process.memory));
         return;
     }
 }
