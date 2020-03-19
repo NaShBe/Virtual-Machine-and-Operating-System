@@ -6,8 +6,8 @@
 #include "architecture.h"
 #include "process.h"
 
-extern status_enum give_program_to_cpu(arch_core*, vmos_pcb*);
 
+extern void swap_process(arch_core*);
 
-#endif 
+#endif /* dispatcher.h */
 
