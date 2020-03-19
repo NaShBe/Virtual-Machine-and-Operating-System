@@ -1,3 +1,4 @@
+#include "vmos.h"
 #include "loader.h"
 #include "architecture.h"
 #include "harddrive.h"
@@ -10,6 +11,73 @@
 
 vmos_pcb_list* loaded_processes = NULL;
 vmos_pcb_list* unloaded_processes = NULL;
+
+void load_jobs()
+{
+    vmos_uint processes_left = 0;
+    vmos_uint loading_left = 0;
+    if (unloaded_processes != NULL)
+    {
+        for (vmos_int j = 0; j < unloaded_processes->count; j++)
+        {
+            if (unloaded_processes->list[j] != NULL)
+            {
+                loading_left++;
+                arch_addr free_area = help_find_free_space(unloaded_processes->list[j]);
+                if (free_area != 0)
+                {
+                    help_write_to_mem(unloaded_processes->list[j]->process.memory, unloaded_processes->list[j]->process.size, free_area);
+                    unloaded_processes->list[j]->program_status = loaded;
+                    loaded_processes->list[loaded_processes->count] = unloaded_processes->list[j];
+                    unloaded_processes->list[j] = NULL;
+                }
+            }
+        }
+
+        if (loaded_processes == 0)
+        {
+            printf("All process have executed successfully. Closing VMOS...");
+            is_done_executing = TRUE;
+        }
+
+    }
+    if (loaded_processes != NULL)
+    {
+        for (vmos_int i = 0; i < loaded_processes->count; i++)
+        {
+            if (loaded_processes->list[i] != NULL)
+            {
+                processes_left++;
+            }
+        }
+
+        if (loading_left == 0)
+        {
+            free(unloaded_processes);
+            unloaded_processes = NULL;
+            printf("All processes have been loaded.\n");
+        }
+    }
+}
+
+void free_jobs()
+{
+    for (vmos_int i = 0; i < loaded_processes->count; i++)
+    {
+        if (loaded_processes->list[i]->program_status == exit_success)
+        {
+            printf("freeing memory of job %i: executed successfully...\n", i+1);
+            free(loaded_processes->list[i]);
+            loaded_processes->list[i] = NULL;
+        }
+        else if (loaded_processes->list[i]->program_status == exit_failure)
+        {
+            printf("freeing memory of job %i: process execution failed...\n", i+1);
+            free(loaded_processes->list[i]);
+            loaded_processes->list[i] = NULL;
+        }
+    }
+}
 
 void get_jobs(arch_drive* drive)
 {
@@ -104,4 +172,5 @@ void output_loader(vmos_char* file)
                 fprintf(output_file, "\t\t\tNo program status set for this process...");
         }
     }
+    fclose(output_file);
 }

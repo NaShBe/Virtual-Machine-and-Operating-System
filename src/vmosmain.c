@@ -1,3 +1,5 @@
+#include "vmos.h"
+#include "architecture.h"
 #include "handler.h"
 #include "parse.h"
 #include "harddrive.h"
@@ -7,6 +9,8 @@ int main(int argc, char** argv)
     init_error();
     job_list* main_jobs;
     arch_drive* main_drive;
+
+    vmos_bool      is_done_executing = FALSE;
     
     if (argc > 1)
     {

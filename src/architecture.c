@@ -13,6 +13,7 @@
  *	========================================= 
  */
 
+#include "vmos.h"
 #include "architecture.h"
 #include "instructions.h"
 #include "handler.h"
@@ -171,7 +172,7 @@ void step (arch_core* core)
 				core->pipeline[i](core);
 			}
 		}
-	} while ((core->pipeline[CORE_EXE_STEP] != halt) || core->id == 0);
+	} while (is_done_executing == FALSE);
 }
 
 static void fetch(arch_core* core)
@@ -328,7 +329,7 @@ static void no_op(arch_core* core)
 
 static void read(arch_core* core)
 {
-
+	
 }
 
 static void write(arch_core* core)
@@ -595,6 +596,10 @@ arch_byte* help_get_ram_addr(arch_addr address)
 
 arch_addr help_get_arch_addr(arch_byte* address)
 {
+	if (address == NULL)
+	{
+		return 0;
+	}
 	return(arch_addr)address - (arch_addr)arch_memory ;
 }
 
