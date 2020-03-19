@@ -26,7 +26,10 @@ void load_jobs()
                 arch_addr free_area = help_find_free_space(unloaded_processes->list[j]);
                 if (free_area != 0)
                 {
-                    
+                    help_write_to_mem(unloaded_processes->list[j]->process.memory, unloaded_processes->list[j]->process.size, free_area);
+                    unloaded_processes->list[j]->program_status = loaded;
+                    loaded_processes->list[loaded_processes->count] = unloaded_processes->list[j];
+                    unloaded_processes->list[j] = NULL;
                 }
             }
         }
@@ -74,11 +77,6 @@ void free_jobs()
             loaded_processes->list[i] = NULL;
         }
     }
-}
-
-void free_job(vmos_pcb* job)
-{
-
 }
 
 void get_jobs(arch_drive* drive)
