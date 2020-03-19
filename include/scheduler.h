@@ -10,7 +10,7 @@ typedef struct
     vmos_uint capacity;
 } queue;
 
-init_scheduler(vmos_pcb_list process_list, arch_core* cores);
+init_scheduler(vmos_pcb_list* process_list, arch_core* cores, arch_uint size);
 vmos_pcb* select_process_for_core(arch_uint cpuid);
 
 #endif 

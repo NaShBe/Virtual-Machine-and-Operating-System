@@ -4,6 +4,8 @@
 #include "parse.h"
 #include "harddrive.h"
 #include "loader.h"
+#include "scheduler.h"
+#include "dispatcher.h"
 
 int main(int argc, char** argv)
 {
@@ -33,11 +35,19 @@ int main(int argc, char** argv)
     init_drive(main_drive);
     write_to_disc(main_drive, main_jobs);
     get_jobs(main_drive);
-
-    /*
     arch_core* multi_cores[2];
     multi_cores[0] = init_core_default();
     multi_cores[1] = init_core_default();
+    init_scheduler(loaded_processes, multi_cores, 2);
+    while (is_done_executing == FALSE)
+    {
+
+    }
+
+    
+
+    /*
+    
     // scheduler
     // dispatcher
     cycle(multi_cores, 2);

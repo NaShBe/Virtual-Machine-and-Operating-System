@@ -10,7 +10,7 @@ static queue* wait_queue;
 static const arch_bool FIFO; 
 
 queue* create_queues();
-init_scheduler(vmos_pcb_list process_list, arch_core* cores);
+init_scheduler(vmos_pcb_list* process_list, arch_core* cores, arch_uint size);
 add_process_to_ready_queue(vmos_pcb* process);
 wait_to_ready(vmos_uint pid);
 reorder_ready();
@@ -38,15 +38,15 @@ queue* create_queues()
     wait_queue->count = 0;
 }
 
-init_scheduler(vmos_pcb_list process_list, arch_core* cores)
+init_scheduler(vmos_pcb_list* process_list, arch_core* cores, arch_uint size)
 {
     create_queues();
-    vmos_int core_number = sizeof(cores)/sizeof(cores[0]);
+    vmos_int core_number = size;
 
-    for(vmos_uint i = 0; i < process_list.count + 1; i++) 
+    for(vmos_uint i = 0; i < process_list->count + 1; i++) 
     {
-        process_list.list[i]->program_status = loaded;
-        help_add_to_queue(&ready_queue, process_list.list[i]);
+        process_list->list[i]->program_status = loaded;
+        help_add_to_queue(&ready_queue, process_list->list[i]);
     }
     if (FIFO == 'false') 
     {
