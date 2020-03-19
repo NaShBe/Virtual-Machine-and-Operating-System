@@ -12,13 +12,15 @@ static const arch_bool FIFO;
 queue* create_queues();
 init_scheduler(vmos_pcb_list process_list, arch_core* cores);
 add_process_to_ready_queue(vmos_pcb* process);
-watch_queue();
 wait_to_ready(vmos_uint pid);
 reorder_ready();
+send_to_wait(queue* wait_queue, vmos_pcb* process);
 void swap(vmos_pcb *xp, vmos_pcb *yp);
 void bubbleSort(vmos_pcb* arr[], arch_int n);
 wait_to_ready(vmos_uint pid);
 send_to_wait(queue* wait_queue, vmos_pcb* process);
+vmos_pcb* select_process_for_core(arch_uint cpuid);
+pop_from_ready();
 void help_add_to_queue(queue* process_queue, vmos_pcb* pcb);
 
 queue* create_queues() 
