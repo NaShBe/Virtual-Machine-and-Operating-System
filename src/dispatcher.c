@@ -41,6 +41,6 @@ void unstage_process(arch_core* core, vmos_pcb* pcb)
 {
     pcb->state_reg = core->regs;
     pcb->program_status = exit_success;
-    //tell loader to free up memory of this process
+    free_jobs();
 }
 #endif /* dispatcher.c */
