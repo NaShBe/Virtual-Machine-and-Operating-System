@@ -73,7 +73,10 @@ typedef struct a_c				arch_core;
 typedef struct a_dma_r			arch_dma_registers;
 typedef struct a_d				arch_device;
 typedef struct a_dma			arch_dma;
+struct vmos_pcb;
 
+
+#include "vmos.h"
 #include "instructions.h"
 
 typedef void(* arch_pipe_func)(arch_core*);
@@ -113,14 +116,15 @@ struct a_alu
 
 struct a_c
 {
-	arch_uint		id;
-	arch_registers  regs;
-	arch_alu        alu;
-	arch_pipe_func	pipeline[CORE_STEPS];
-	arch_word       cycle_count;
-	arch_bool       is_enabled_intrpt;
-	arch_thread		thread;
-	arch_byte*		cache[50];
+	arch_uint			id;
+	arch_registers  	regs;
+	arch_alu        	alu;
+	arch_pipe_func		pipeline[CORE_STEPS];
+	arch_word       	cycle_count;
+	arch_bool       	is_enabled_intrpt;
+	arch_thread			thread;
+	struct vmos_pcb*	pcb_reference;
+	arch_byte*			cache[50];
 };
 
 struct a_dma_r

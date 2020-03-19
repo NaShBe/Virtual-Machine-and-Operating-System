@@ -3,6 +3,7 @@
 #include "handler.h"
 #include "parse.h"
 #include "harddrive.h"
+#include "loader.h"
 
 int main(int argc, char** argv)
 {
@@ -31,6 +32,7 @@ int main(int argc, char** argv)
     
     init_drive(main_drive);
     write_to_disc(main_drive, main_jobs);
+    get_jobs(main_drive);
 
     /*
     arch_core* multi_cores[2];

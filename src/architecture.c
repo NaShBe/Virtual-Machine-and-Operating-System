@@ -329,12 +329,32 @@ static void no_op(arch_core* core)
 
 static void read(arch_core* core)
 {
-	
+	arch_addr data_address;
+	if (((inp_out_data)core->regs.ir.data).addr == 0)
+	{
+		data_address = ((inp_out_data)core->regs.ir.data).reg2;
+	}
+	else
+	{
+		data_address = ((inp_out_data)core->regs.ir.data).addr;
+	}
+
+	*(help_get_reg(core, ((inp_out_data)core->regs.ir.data).reg1)) = read_data(core->pcb_reference->fd, data_address);
 }
 
 static void write(arch_core* core)
 {
+	arch_addr data_address;
+	if (((inp_out_data)core->regs.ir.data).addr == 0)
+	{
+		data_address = ((inp_out_data)core->regs.ir.data).reg2;
+	}
+	else
+	{
+		data_address = ((inp_out_data)core->regs.ir.data).addr;
+	}
 
+	write_data(core->pcb_reference->fd, data_address, *(help_get_reg(core, ((inp_out_data)core->regs.ir.data).reg1)));
 }
 
 static void store(arch_core* core)
@@ -459,19 +479,20 @@ static void set_less_imm(arch_core* core)
 {
 	arch_uint eff_data = ((cond_imm_data)core->regs.ir.data).addr;
   	arch_uint eff_reg = ((cond_imm_data)core->regs.ir.data).breg;
-	if(((arith_data)core->regs.ir.data).src1 < ((arith_data)core->regs.ir.data).breg) 
+	arch_uint d_reg = ((cond_imm_data)core->regs.ir.data).dreg;
+	if(eff_reg < eff_data) 
 	{
-		*help_get_reg(core, eff_addr).dreg = core=>reg.zr.data + 1;
+		*help_get_reg(core, d_reg) = 1;
 	} 
 	else
 	{
-		*help_get_reg(core, eff_addr).dreg = core=>reg.zr.data;
+		*help_get_reg(core, d_reg) = 0;
 	}
 }
 
 static void halt(arch_core* core)
 {
-	core->regs.ac.data = core->(regs.ir.data);
+	core->regs.pc--;
 }
 
 static void jump(arch_core* core)

@@ -1,8 +1,8 @@
 #ifndef VMOS_PROCESS_H
 #define VMOS_PROCESS_H
 
-#include "architecture.h"   // needed for arch_registers
 #include "vmos.h"           // needed for vmos_uint
+#include "architecture.h"   // needed for arch_registers
 
 typedef enum
 {
@@ -19,7 +19,7 @@ typedef struct
     vmos_uint  size;
 } vmos_process;
 
-typedef struct                      /* every loaded program must have a pcb attached to it */
+typedef struct vmos_pcb                      /* every loaded program must have a pcb attached to it */
 {
     vmos_uint           pid;            /* unique id attached to job */
     vmos_uint           fd;             /* which file this is (for data input) */

@@ -13,7 +13,6 @@ typedef unsigned int    vmos_bool;
 #undef FALSE
 #define TRUE 1
 #define FALSE 0
-typedef struct vmos_pcb vmos_pcb;
 
 extern vmos_bool      is_done_executing;
 

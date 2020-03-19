@@ -1,3 +1,4 @@
+#include "vmos.h"
 #include "architecture.h"
 #include "handler.h"
 #include "parse.h"
@@ -34,4 +35,18 @@ void write_to_disc(arch_drive* drive, job_list* jobs)
 drive_file* get_file(arch_drive* drive, arch_uint fd)
 {
     return drive->file_system.files[fd];
+}
+
+arch_word read_data(arch_uint fd, arch_addr data_addr)
+{
+    arch_byte* address = (arch_byte*)(main_drive->file_system.files[fd]->data_buff);
+    address += data_addr;
+    return *(arch_word*)address;
+}
+
+void write_data(arch_uint fd, arch_addr data_addr, arch_word data)
+{
+    arch_byte* address = (arch_byte*)(main_drive->file_system.files[fd]->data_buff);
+    address += data_addr;
+    *(arch_word*)(address) = data;
 }

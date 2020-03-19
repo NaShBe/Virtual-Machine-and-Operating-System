@@ -12,6 +12,12 @@
 vmos_pcb_list* loaded_processes = NULL;
 vmos_pcb_list* unloaded_processes = NULL;
 
+void free_jobs();
+void load_jobs();
+void get_jobs(arch_drive*);
+void output_loader(vmos_char*);
+arch_addr help_find_free_space(vmos_pcb*);
+
 void load_jobs()
 {
     vmos_uint processes_left = 0;
