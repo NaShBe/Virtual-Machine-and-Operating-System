@@ -38,10 +38,8 @@ int main(int argc, char** argv)
     arch_core* multi_cores[2];
     multi_cores[0] = init_core_default();
     multi_cores[1] = init_core_default();
-    cycle(multi_cores, 2);
-    */
-
-    // loader
     // scheduler
     // dispatcher
+    cycle(multi_cores, 2);
+    */
 }
