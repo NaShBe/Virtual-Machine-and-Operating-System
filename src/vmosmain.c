@@ -46,12 +46,15 @@ int main(int argc, char** argv)
 
     while (is_done_executing == FALSE)
     {
-        
-
+        for(arch_uint i = 0; i = 2; i ++)
+        {
+            if(multi_cores[i]->pipeline[CORE_EXE_STEP] == halt)
+            {
+                swap_process(multi_cores[i]);
+            }
+        }
+        cycle(multi_cores, 2);
     }
-
-    
-
     /*
     
     // scheduler
