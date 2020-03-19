@@ -1,7 +1,7 @@
 #ifndef VMOS_DISPATCHER_C
 #define VMOS_DISPATCHER_C
 
-//include "dispatcher.h"
+#include "dispatcher.h"
 #include "process.h"
 #include "architecture.h"
 #include "scheduler.h"
