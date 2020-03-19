@@ -28,6 +28,12 @@ void swap_process(arch_core* core)
     stage_ready_process(core, incoming_process);
 }
 
+void init_dispatch(arch_core* core) 
+{
+    incoming_process = select_process_for_core(core->id); 
+    stage_ready_process(core, incoming_process);
+}
+
 
 void stage_ready_process(arch_core* core, vmos_pcb* pcb)
 {

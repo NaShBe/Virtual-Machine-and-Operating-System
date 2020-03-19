@@ -39,13 +39,22 @@ int main(int argc, char** argv)
     multi_cores[0] = init_core_default();
     multi_cores[1] = init_core_default();
     init_scheduler(loaded_processes, multi_cores, 2);
-    while (is_done_executing == FALSE)
+    for (vmos_int i = 0; i < 2; i++) 
     {
-
+        init_dispatch(multi_cores[i]);
     }
 
-    
-
+    while (is_done_executing == FALSE)
+    {
+        for(arch_uint i = 0; i = 2; i ++)
+        {
+            if(multi_cores[i]->pipeline[CORE_EXE_STEP] == halt)
+            {
+                swap_process(multi_cores[i]);
+            }
+        }
+        cycle(multi_cores, 2);
+    }
     /*
     
     // scheduler
