@@ -64,6 +64,7 @@ void       			help_write_to_mem		(arch_byte*, arch_uint, arch_addr);
 void 				help_write_to_mem_word	(arch_word*, arch_addr);
 arch_byte*			help_get_ram_addr		(arch_addr);
 arch_addr			help_get_arch_addr		(arch_byte*);
+arch_uint			help_get_instruction	(arch_core*);
 static arch_word*	help_get_reg			(arch_core*, arch_uint);
 static void 		help_push				(arch_word, arch_core*);
 static void			help_pop				(arch_core*);
@@ -647,5 +648,10 @@ static void help_pop(arch_core* core)
 		core->regs.bp = *(&arch_memory + core->regs.bp);
 		core->regs.sp -= ARCH_WORD_SIZE;
 	}
+}
+
+arch_uint help_get_instruction(arch_core* core)
+{
+	return core->regs.ir.opcode;
 }
 	/* architecture.c*/

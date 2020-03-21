@@ -1,5 +1,6 @@
 #include "vmos.h"
 #include "architecture.h"
+#include "instructions.h"
 #include "handler.h"
 #include "parse.h"
 #include "harddrive.h"
@@ -48,7 +49,7 @@ int main(int argc, char** argv)
     {
         for(arch_uint i = 0; i = 2; i ++)
         {
-            if(multi_cores[i]->pipeline[CORE_EXE_STEP] == halt)
+            if(help_get_instruction(multi_cores[i]) == HTL)
             {
                 swap_process(multi_cores[i]);
             }
