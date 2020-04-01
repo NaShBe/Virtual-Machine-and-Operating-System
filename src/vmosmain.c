@@ -39,6 +39,8 @@ int main(int argc, char** argv)
     arch_core* multi_cores[2];
     multi_cores[0] = init_core_default();
     multi_cores[1] = init_core_default();
+
+    /*
     init_scheduler(loaded_processes, multi_cores, 2);
     for (vmos_int i = 0; i < 2; i++) 
     {
@@ -56,6 +58,9 @@ int main(int argc, char** argv)
         }
         cycle(multi_cores, 2);
     }
+    */
+
+   
     /*
     
     // scheduler

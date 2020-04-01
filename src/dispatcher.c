@@ -1,6 +1,3 @@
-#ifndef VMOS_DISPATCHER_C
-#define VMOS_DISPATCHER_C
-
 #include "dispatcher.h"
 #include "process.h"
 #include "architecture.h"
@@ -10,6 +7,11 @@
 
 vmos_pcb* cpu_process;
 vmos_pcb* incoming_process;
+
+void swap_process(arch_core*);
+void init_dispatch(arch_core*);
+void stage_ready_process(arch_core*, vmos_pcb*);
+void unstage_process(arch_core*, vmos_pcb*);
 
 void swap_process(arch_core* core) 
 {
@@ -49,4 +51,4 @@ void unstage_process(arch_core* core, vmos_pcb* pcb)
     pcb->program_status = exit_success;
     free_jobs();
 }
-#endif /* dispatcher.c */ 
+/* dispatcher.c */ 
