@@ -1,15 +1,13 @@
 #ifndef VMOS_DISPATCHER_H
 #define VMOS_DISPATCHER_H
 
-
 #include "archE.h"
 #include "architecture.h"
 #include "process.h"
 
-/**
- * Swaps the current process in the cpu to a ready process from scheduler
- */
-extern void swap_process(arch_core*);
-extern void init_dispatch(arch_core*);
+extern void init_dispatcher(arch_core** core_array, vmos_uint size);
+extern void dispatch_cores();
+void stage_ready_process(arch_core*, vmos_pcb*);
+void unstage_process(arch_core*, vmos_pcb*);
 
 #endif /* dispatcher.h */

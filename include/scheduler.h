@@ -2,15 +2,16 @@
 #define VMOS_SCHEDULER_H
 
 #include "process.h"
+#include "architecture.h"
 
 typedef struct
 {
-    vmos_pcb** pcb;
+    vmos_pcb* processes[CORE_COUNT];
     vmos_uint count;
-    vmos_uint capacity;
+    vmos_int current_priority;
 } queue;
 
-init_scheduler(vmos_pcb_list* process_list, arch_core* cores, arch_uint size);
-vmos_pcb* select_process_for_core(arch_uint cpuid);
+extern void init_scheduler(arch_core**, vmos_uint);
+extern void schedule_tasks();
 
 #endif 

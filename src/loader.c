@@ -139,11 +139,13 @@ void output_loader(vmos_char* file)
     if( access( file, F_OK ) != -1 ) {
         // file exists
         output_file = fopen(file, "w+");
+        fprintf(output_file, "/n/n/n");
     }
     else
     {
         // file doesn't exist
         output_file = fopen(file, "w");
+        fprintf(output_file, "Parser context not found. Starting with loader context...");
     }
 
     if (has_read == FALSE)
@@ -173,7 +175,7 @@ void output_loader(vmos_char* file)
             case exit_success:
                 fprintf(output_file, "\t\t\tThis process executed successfully.");
             case exit_failure:
-                fprintf(output_file, "\t\t\tThis process executed unsuccessfully.");
+                fprintf(output_file, "\t\t\tThis process did not execute successfully.");
             default:
                 fprintf(output_file, "\t\t\tNo program status set for this process...");
         }

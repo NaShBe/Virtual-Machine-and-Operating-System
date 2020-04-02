@@ -41,7 +41,12 @@
 #define CORE_STEPS    3		// This is how many steps are taken to complete one CPU instruction (fetching, decoding, executing)
 #define CORE_EXE_STEP CORE_STEPS - 1
 #define CORE_MAX_DEVICES	1
+
 // NOTE: execution step must always be the last step (probably not true now)
+
+#ifndef CORE_COUNT
+#define CORE_COUNT 1
+#endif
 
 #ifdef __WIN32
 #include <windows.h>

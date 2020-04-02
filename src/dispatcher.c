@@ -5,37 +5,25 @@
 #include "handler.h"
 #include "loader.h"
 
-vmos_pcb* cpu_process;
-vmos_pcb* incoming_process;
+static arch_core**  cores;
+static vmos_uint    core_count;
 
-void swap_process(arch_core*);
-void init_dispatch(arch_core*);
+void init_dispatcher(arch_core** core_array, vmos_uint size);
+void dispatch_cores();
 void stage_ready_process(arch_core*, vmos_pcb*);
 void unstage_process(arch_core*, vmos_pcb*);
 
-void swap_process(arch_core* core) 
+
+void init_dispatcher(arch_core** core_array, vmos_uint size)
 {
-    cpu_process = core->pcb_reference;
-    if(cpu_process == NULL)
-    {
-        send_error(undefined);
-    }
-    incoming_process = select_process_for_core(core->id); 
-    if(incoming_process == NULL)
-    {
-        core->regs.ir = cpu_process->rtend;
-        return;
-    }
-    unstage_process(core, cpu_process);
-    stage_ready_process(core, incoming_process);
+    cores = core_array;
+    core_count = size;
 }
 
-void init_dispatch(arch_core* core) 
+void dispatch_cores()
 {
-    incoming_process = select_process_for_core(core->id); 
-    stage_ready_process(core, incoming_process);
+    
 }
-
 
 void stage_ready_process(arch_core* core, vmos_pcb* pcb)
 {

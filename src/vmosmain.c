@@ -11,10 +11,10 @@
 int main(int argc, char** argv)
 {
     init_error();
-    job_list* main_jobs;
+    job_list*   main_jobs;
     arch_drive* main_drive;
 
-    vmos_bool      is_done_executing = FALSE;
+    vmos_bool   is_done_executing = FALSE;
     
     if (argc > 1)
     {
@@ -36,35 +36,20 @@ int main(int argc, char** argv)
     init_drive(main_drive);
     write_to_disc(main_drive, main_jobs);
     get_jobs(main_drive);
-    arch_core* multi_cores[2];
-    multi_cores[0] = init_core_default();
-    multi_cores[1] = init_core_default();
-
-    /*
-    init_scheduler(loaded_processes, multi_cores, 2);
-    for (vmos_int i = 0; i < 2; i++) 
+    load_jobs();
+    arch_core* multi_cores[CORE_COUNT];
+    for (vmos_int i = 0; i < CORE_COUNT; i ++)
     {
-        init_dispatch(multi_cores[i]);
+        multi_cores[i] = init_core_default();
     }
+    init_scheduler(multi_cores, CORE_COUNT);
+    init_dispatcher(multi_cores, CORE_COUNT);
 
     while (is_done_executing == FALSE)
     {
-        for(arch_uint i = 0; i = 2; i ++)
-        {
-            if(help_get_instruction(multi_cores[i]) == HTL)
-            {
-                swap_process(multi_cores[i]);
-            }
-        }
-        cycle(multi_cores, 2);
+        schedule_tasks();
+        dispatch_cores();
+        load_jobs();
+        free_jobs();
     }
-    */
-
-   
-    /*
-    
-    // scheduler
-    // dispatcher
-    cycle(multi_cores, 2);
-    */
 }
