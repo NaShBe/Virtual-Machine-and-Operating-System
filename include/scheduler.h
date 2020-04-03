@@ -15,7 +15,8 @@ typedef struct
 
 extern queue ready_queue;
 
-extern void init_scheduler(arch_core**, vmos_uint);
-extern void schedule_tasks();
+extern void         init_scheduler(arch_core**, vmos_uint);
+extern void         schedule_tasks();
+extern vmos_pcb*    remove_from_queue();
 
 #endif /* scheduler.h */

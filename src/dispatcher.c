@@ -22,21 +22,24 @@ void init_dispatcher(arch_core** core_array, vmos_uint size)
 
 void dispatch_cores()
 {
-    
+    for (vmos_int i = 0; i < core_count; i++)
+    {
+        if (cores[i]->pcb_reference == NULL && help_get_instruction(cores[i]) == HTL)
+        {
+            cores[i]->pcb_reference == remove_from_queue();
+            if (cores[i]->pcb_reference == NULL)
+            {
+                continue;
+            }
+            cores[i]->regs.pc = cores[i]->pcb_reference->process.memory;
+            cores[i]->pcb_reference->cpuid = cores[i]->id;
+        }
+        else if (help_get_instruction(cores[i]) == HTL)
+        {
+            cores[i]->pcb_reference->program_status = exit_success;
+            cores[i]->pcb_reference = NULL;
+        }
+    }
 }
 
-void stage_ready_process(arch_core* core, vmos_pcb* pcb)
-{
-    core->regs = pcb->state_reg;
-    core->pcb_reference = pcb;
-    pcb->program_status = running;
-    //set cpu to run the process
-}
-
-void unstage_process(arch_core* core, vmos_pcb* pcb)
-{
-    pcb->state_reg = core->regs;
-    pcb->program_status = exit_success;
-    free_jobs();
-}
 /* dispatcher.c */ 
