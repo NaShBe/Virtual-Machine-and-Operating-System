@@ -7,11 +7,15 @@
 typedef struct
 {
     vmos_pcb* processes[CORE_COUNT];
-    vmos_uint count;
+    vmos_uint start;
+    vmos_uint end;
+    vmos_uint free;
     vmos_int current_priority;
 } queue;
+
+extern queue ready_queue;
 
 extern void init_scheduler(arch_core**, vmos_uint);
 extern void schedule_tasks();
 
-#endif 
+#endif /* scheduler.h */
