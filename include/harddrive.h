@@ -39,7 +39,7 @@ extern arch_drive*    main_drive;
 extern void         init_drive(arch_drive* drive);
 extern void         write_to_disc(arch_drive* drive, job_list* jobs);
 extern drive_file*  get_file(arch_drive* drive, arch_uint fd);
-arch_word           read_data(arch_uint, arch_addr);
-void                write_data(arch_uint, arch_addr, arch_word);
+extern arch_word           read_data(arch_uint, arch_addr);
+extern void                write_data(arch_uint, arch_addr, arch_word);
 
 #endif

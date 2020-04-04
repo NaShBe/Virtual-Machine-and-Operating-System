@@ -9,6 +9,15 @@ queue ready_queue;
 static arch_core** cores;
 static vmos_uint core_count;
 
+void init_scheduler(arch_core**, vmos_uint);
+void schedule_tasks();
+void add_to_queue();
+vmos_pcb* remove_from_queue();
+vmos_pcb* remove_from_queue_specific(vmos_uint);
+void reorganize_queue();
+
+
+
 void init_scheduler(arch_core** core_array, vmos_uint size)
 {
     cores = core_array;
@@ -30,7 +39,7 @@ void schedule_tasks()
     vmos_int count = 0;
     while(ready_queue.free != 0 && count < loaded_processes->count)
     {
-        if (loaded_processes->list[count]->pid = ready_queue.current_priority + 1)
+        if (loaded_processes->list[count]->pid == ready_queue.current_priority + 1)
         {
             if (loaded_processes->list[count]->program_status == loaded)
             {
@@ -77,7 +86,7 @@ vmos_pcb* remove_from_queue()
     {
         return NULL;
     }
-    vmos_pcb* process = &ready_queue.processes[ready_queue.start];
+    vmos_pcb* process = ready_queue.processes[ready_queue.start];
     if (ready_queue.start == core_count - 1)
     {
         ready_queue.start = 0;
@@ -89,10 +98,12 @@ vmos_pcb* remove_from_queue()
     return process;
 }
 
-vmos_pcb* remove_from_queue(vmos_uint index)
+vmos_pcb* remove_from_queue_specific(vmos_uint index)
 {
+    vmos_pcb* process = ready_queue.processes[index];
     ready_queue.processes[index] = NULL;
     reorganize_queue();
+    return process;
 }
 
 void reorganize_queue()

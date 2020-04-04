@@ -26,12 +26,12 @@ void dispatch_cores()
     {
         if (cores[i]->pcb_reference == NULL && help_get_instruction(cores[i]) == HTL)
         {
-            cores[i]->pcb_reference == remove_from_queue();
+            cores[i]->pcb_reference = remove_from_queue();
             if (cores[i]->pcb_reference == NULL)
             {
                 continue;
             }
-            cores[i]->regs.pc = cores[i]->pcb_reference->process.memory;
+            cores[i]->regs.pc = help_get_arch_addr(cores[i]->pcb_reference->process.memory);
             cores[i]->pcb_reference->cpuid = cores[i]->id;
         }
         else if (help_get_instruction(cores[i]) == HTL)

@@ -8,13 +8,14 @@
 #include "scheduler.h"
 #include "dispatcher.h"
 
+job_list*   main_jobs;
+arch_drive* main_drive;
+
+vmos_bool   is_done_executing = FALSE;
+
 int main(int argc, char** argv)
 {
     init_error();
-    job_list*   main_jobs;
-    arch_drive* main_drive;
-
-    vmos_bool   is_done_executing = FALSE;
     
     if (argc > 1)
     {

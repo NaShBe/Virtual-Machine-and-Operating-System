@@ -18,8 +18,10 @@
 #include "instructions.h"
 #include "handler.h"
 #include "process.h"
+#include "harddrive.h"
 #include <stddef.h>		/* for NULL */
 #include <stdlib.h>		/* for malloc */
+#include <stdio.h>		/* for printf */
 #include <pthread.h>	/* for threading of core and DMA processes */
 
 
@@ -27,7 +29,7 @@ volatile arch_byte		arch_memory[RAM_SIZE * ARCH_WORD_SIZE];
 static arch_dma*		core_dma_cont = NULL;
 static arch_uint		core_amount;
 static arch_bool		has_bus_control;
-static arch_interrupt_table* const intrpt_vector = &arch_memory + INTRPT_OFFSET;
+static arch_interrupt_table* const intrpt_vector = (arch_interrupt_table*)(arch_memory + INTRPT_OFFSET);
 
 
 // externally available functions
@@ -71,16 +73,16 @@ static void			help_pop				(arch_core*);
 
 arch_core* init_core_default()
 {
-	const arch_instr resetjump = {.format = FORMAT_UJF, .opcode = JMP, .data = intrpt_vector};
+	const arch_instr resetjump = {.format = FORMAT_UJF, .opcode = JMP, .data = help_get_arch_addr(intrpt_vector)};
 	*intrpt_vector = (arch_interrupt_table){.reset = resetjump, .undefined = 0, .math = 0, .dma = 0, .software = 0};
-	
+
 	arch_core* core = malloc(sizeof(arch_core));
 	if (core == NULL)
 	{
 		send_error(bad_malloc);
 	}
 	*core = (arch_core){.regs = {0}, .pipeline = {fetch, decode, no_op}};
-	core->regs.pc = &arch_memory;
+	core->regs.pc = help_get_arch_addr(arch_memory);
 	core->cycle_count = 0;
 	core_amount++;
 	return core;
@@ -93,8 +95,12 @@ arch_core* init_core(arch_registers* regs_init, arch_pipe_func* pipeline, arch_a
 	{
 		send_error(bad_malloc);
 	}
-	*core = (arch_core){.regs = *regs_init, .pipeline = pipeline};
-	core->regs.pc = &arch_memory + entry_point;
+	*core = (arch_core){.regs = *regs_init};
+	for (arch_int i = 0; i < CORE_STEPS; i++)
+	{
+		core->pipeline[i] = pipeline[i];
+	}
+	core->regs.pc = help_get_arch_addr(arch_memory + entry_point);
 	core->cycle_count = 0;
 	core_amount++;
 	return core;
@@ -114,8 +120,8 @@ void cycle(arch_core** core_list, arch_uint core_list_size)
 	for (arch_int i = 0; i < core_list_size; i++)
 	{
 		arch_core* core = core_list[i];
-		pthread_create(&core->thread, NULL, step, core);
-		pthread_join(&core->thread, NULL);
+		pthread_create(core->thread, NULL, step, core);
+		pthread_join(core->thread, NULL);
 	}
 	#endif
 }
@@ -385,7 +391,7 @@ static void store(arch_core* core)
 
 	if (reg != NULL)
 	{
-		help_write_to_mem(reg, sizeof(arch_word), eff_addr);
+		help_write_to_mem((arch_byte*)reg, sizeof(arch_word), eff_addr);
 	}
 	else 
 	{
@@ -439,15 +445,15 @@ static void arithm(arch_core* core)
 			else; //TODO: divide by zero interrupt
 			break;
 		case AND:
-			core->alu.output = core->alu.oprand1 & core->alu.oprand2;
+			*core->alu.output = core->alu.oprand1 & core->alu.oprand2;
 			break;
 		case OR:
-			core->alu.output = core->alu.oprand1 | core->alu.oprand2;
+			*core->alu.output = core->alu.oprand1 | core->alu.oprand2;
 			break;
 		case SLT:
 			break;
 	}
-	core->regs.ac = core->alu.output;
+	core->regs.ac = *core->alu.output;
 }
 
 static void mov_imm(arch_core* core)
@@ -576,7 +582,7 @@ static void interrupt(arch_core* core)
 
 void help_write_to_mem(arch_byte* data, arch_uint size, arch_addr addr)
 {
-	arch_byte* offset = &(arch_memory[addr]);
+	volatile arch_byte* offset = &(arch_memory[addr]);
 	arch_uint count = 0;
 
 	while (offset <= &(arch_memory[(RAM_SIZE * ARCH_WORD_SIZE)-1]) && size < count)
@@ -610,7 +616,7 @@ static arch_word* help_get_reg(arch_core* core, arch_uint eff_reg)
 		case 12:
 			return &core->regs.pc;
 		case 13:
-			return &core->regs.ir;
+			return (arch_word*)&core->regs.ir;
 		case 14:
 			return &core->regs.sp;
 		case 15:
@@ -618,6 +624,7 @@ static arch_word* help_get_reg(arch_core* core, arch_uint eff_reg)
 		default:
 			send_error(reg_invalid);
 	}
+	return NULL;
 }
 
 arch_byte* help_get_ram_addr(arch_addr address)
@@ -648,7 +655,7 @@ static void help_pop(arch_core* core)
 	core->regs.sp -= ARCH_WORD_SIZE;
 	if (core->regs.sp == core->regs.bp)
 	{
-		core->regs.bp = *(&arch_memory + core->regs.bp);
+		core->regs.bp = (arch_addr)*(arch_memory + core->regs.bp);
 		core->regs.sp -= ARCH_WORD_SIZE;
 	}
 }

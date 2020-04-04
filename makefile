@@ -2,7 +2,7 @@ CC = gcc
 CCFLAGS = -o vmos
 CFLAGS = -I include -c
 OBJDEP = architecture.o dispatcher.o handler.o harddrive.o loader.o parse.o process.o scheduler.o vmosmain.o
-HEADERDEP = architecture.h dispatcher.h handler.h harddrive.h loader.h parse.h process.h scheduler.h vmos.h
+HEADERDEP = include/architecture.h include/dispatcher.h include/handler.h include/harddrive.h include/loader.h include/parse.h include/process.h include/scheduler.h include/vmos.h
 
 vmos: $(OBJDEP)
 	$(CC) $(OBJDEP) $(CCFLAGS)
@@ -33,3 +33,6 @@ scheduler.o:
 
 vmosmain.o:
 	$(CC) src/vmosmain.c $(CFLAGS)
+
+clean:
+	rm $(OBJDEP)

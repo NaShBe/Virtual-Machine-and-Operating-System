@@ -1,5 +1,8 @@
-# system files
+# System files
 .DS_Store
 
 # IDE and STK files
 .vscode/*
+
+# Object file
+.o
