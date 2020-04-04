@@ -36,7 +36,7 @@ arch_char* help_to_lower_string(arch_char* string);
 
 job_list* parse_file(const char* path)
 {
-    printf("Parsing file...");
+    printf("Parsing file...\n");
     if (path != NULL)
     {
         read_file(path);
@@ -60,11 +60,13 @@ job_list* parse_file(const char* path)
     jobs->count = 0;
     jobs->jobs = malloc(sizeof(parse_job*)*jobs->capacity);
 
-    instruction_list* instr_list = NULL;                       
-    arch_word*        data_list = NULL; 
+    instruction_list*   instr_list = NULL;                       
+    arch_word*          data_list = NULL;
+    arch_int            line_number = -1; 
 
     while (fgets(read_line, LINE_MAX, input_file) != NULL)
-    {                       
+    {
+        line_number++;
         arch_char*        field_type = malloc(sizeof(arch_char) * FIELD_MAX_SIZE);
         strlcpy(field_type, read_line, FIELD_MAX_SIZE);        
         if (strcmp(field_type, "//") == 0)                  
@@ -196,6 +198,7 @@ job_list* parse_file(const char* path)
                     sscanf(read_line, "%x%*c", &instr_word);
                     if (i < job->instr_count -1)
                     {
+                        line_number++;
                         if (fgets(read_line, LINE_MAX, input_file) == NULL)
                         {
                             send_error(parser_file_error);
@@ -235,7 +238,7 @@ job_list* parse_file(const char* path)
                         default:
                             send_error(parser_file_error);
                     }
-                    printf("instr_word: %x, int_rep: %x          format: %x, opcode: %x\n", instr_word, instr_list->instructions[i].int_rep, instr_list->instructions[i].format, instr_list->instructions[i].opcode); 
+                    printf("%i| instr_word: %x, int_rep: %x          format: %x, opcode: %x\n", line_number, instr_word, instr_list->instructions[i].int_rep, instr_list->instructions[i].format, instr_list->instructions[i].opcode); 
                 }
             }
 
@@ -251,6 +254,7 @@ job_list* parse_file(const char* path)
                     sscanf(read_line, "%x", &data_list[i]);
                     if (i < DATA_TOTAL_SIZE -1)
                     {
+                        line_number++;
                         if (fgets(read_line, LINE_MAX, input_file) == NULL)
                         {
                             send_error(parser_file_error);
@@ -264,6 +268,7 @@ job_list* parse_file(const char* path)
             }
         }
     }
+    printf("\nParsing is done... saving data onto harddrive.\n");
     fclose(input_file);
     return jobs;
 }

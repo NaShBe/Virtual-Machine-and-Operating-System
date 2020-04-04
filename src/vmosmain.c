@@ -7,9 +7,10 @@
 #include "loader.h"
 #include "scheduler.h"
 #include "dispatcher.h"
+#include <stdlib.h>
 
-job_list*   main_jobs;
-arch_drive* main_drive;
+job_list*   main_jobs = NULL;
+arch_drive* main_drive = NULL;
 
 vmos_bool   is_done_executing = FALSE;
 
@@ -34,6 +35,7 @@ int main(int argc, char** argv)
         output_context(main_jobs, "context.txt");
     }
     
+    main_drive = malloc(sizeof(arch_drive));
     init_drive(main_drive);
     write_to_disc(main_drive, main_jobs);
     get_jobs(main_drive);

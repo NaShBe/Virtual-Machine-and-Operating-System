@@ -5,7 +5,7 @@
 .vscode/*
 
 # Object file
-.o
+*.o
 
 # Context files
 context.txt
