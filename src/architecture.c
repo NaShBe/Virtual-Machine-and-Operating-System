@@ -27,7 +27,7 @@ volatile arch_byte		arch_memory[RAM_SIZE * ARCH_WORD_SIZE];
 static arch_dma*		core_dma_cont = NULL;
 static arch_uint		core_amount;
 static arch_bool		has_bus_control;
-static const arch_interrupt_table const* intrpt_vector = &arch_memory + INTRPT_OFFSET;
+static arch_interrupt_table* const intrpt_vector = &arch_memory + INTRPT_OFFSET;
 
 
 // externally available functions
@@ -71,6 +71,9 @@ static void			help_pop				(arch_core*);
 
 arch_core* init_core_default()
 {
+	const arch_instr resetjump = {.format = FORMAT_UJF, .opcode = JMP, .data = intrpt_vector};
+	*intrpt_vector = (arch_interrupt_table){.reset = resetjump, .undefined = 0, .math = 0, .dma = 0, .software = 0};
+	
 	arch_core* core = malloc(sizeof(arch_core));
 	if (core == NULL)
 	{

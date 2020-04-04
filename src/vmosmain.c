@@ -44,6 +44,7 @@ int main(int argc, char** argv)
     }
     init_scheduler(multi_cores, CORE_COUNT);
     init_dispatcher(multi_cores, CORE_COUNT);
+    cycle(multi_cores, CORE_COUNT);
 
     while (is_done_executing == FALSE)
     {
