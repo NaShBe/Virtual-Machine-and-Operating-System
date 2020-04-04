@@ -6,3 +6,10 @@
 
 # Object file
 .o
+
+# Context files
+context.txt
+
+# Executable
+vmos
+vmos.exe
