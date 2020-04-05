@@ -447,7 +447,7 @@ void output_context(job_list* info, const arch_char* file)
         fprintf(fp, "// END of Job #%i\n", i+1);      
     }
     fclose(fp);
-    printf("Parsing done.");
+    printf("(contextualized parsing data written into context.txt)\n\n");
 }
 
 void read_file(const char* path)

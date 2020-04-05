@@ -120,6 +120,7 @@ void cycle(arch_core** core_list, arch_uint core_list_size)
 	for (arch_int i = 0; i < core_list_size; i++)
 	{
 		arch_core* core = core_list[i];
+		core->thread = malloc(sizeof(thread));
 		pthread_create(core->thread, NULL, step, core);
 		pthread_join(core->thread, NULL);
 	}
