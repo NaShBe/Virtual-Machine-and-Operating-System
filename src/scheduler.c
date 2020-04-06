@@ -54,6 +54,7 @@ void schedule_tasks()
                     if (loaded_processes->list[count]->program_status == loaded)
                     {
                         waiting_queue[i] = loaded_processes->list[count];
+                        waiting_queue[i]->program_status = suspended;
                     }
                 }
             }

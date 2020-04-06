@@ -47,7 +47,7 @@
 // NOTE: execution step must always be the last step (probably not true now)
 
 #ifndef CORE_COUNT
-#define CORE_COUNT 1
+#define CORE_COUNT 4
 #endif
 
 #ifdef __WIN32
