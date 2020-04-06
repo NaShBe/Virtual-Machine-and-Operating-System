@@ -8,6 +8,7 @@
 #include "scheduler.h"
 #include "dispatcher.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 job_list*   main_jobs = NULL;
 arch_drive* main_drive = NULL;
@@ -34,19 +35,22 @@ int main(int argc, char** argv)
     {
         output_context(main_jobs, "context.txt");
     }
-    
-    main_drive = malloc(sizeof(arch_drive));
+    main_drive = malloc(sizeof(drive_file));
     init_drive(main_drive);
     write_to_disc(main_drive, main_jobs);
     get_jobs(main_drive);
+    output_loader("context.txt");
     load_jobs();
-    arch_core* multi_cores[CORE_COUNT];
+    arch_core** multi_cores;
+    multi_cores = malloc(sizeof(arch_core*) * CORE_COUNT);
     for (vmos_int i = 0; i < CORE_COUNT; i ++)
     {
+        multi_cores[i] = malloc(sizeof(arch_core));
         multi_cores[i] = init_core_default();
     }
     init_scheduler(multi_cores, CORE_COUNT);
     init_dispatcher(multi_cores, CORE_COUNT);
+    output_loader("context.txt");
     cycle(multi_cores, CORE_COUNT);
 
     while (is_done_executing == FALSE)

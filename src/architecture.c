@@ -22,6 +22,7 @@
 #include <stddef.h>		/* for NULL */
 #include <stdlib.h>		/* for malloc */
 #include <stdio.h>		/* for printf */
+#include <string.h>		/* for memcpy */
 #include <pthread.h>	/* for threading of core and DMA processes */
 
 
@@ -36,6 +37,7 @@ static arch_interrupt_table* const intrpt_vector = (arch_interrupt_table*)(arch_
 arch_core*	init_core_default   ();
 arch_core*	init_core   		(arch_registers*, arch_pipe_func*, arch_addr);
 void      	cycle				(arch_core**, arch_uint);
+void		rerun				(arch_core*);
 void		thread				(arch_core*, arch_addr);
 arch_addr	connect_dma			(arch_device*);
 
@@ -70,10 +72,11 @@ arch_uint			help_get_instruction	(arch_core*);
 static arch_word*	help_get_reg			(arch_core*, arch_uint);
 static void 		help_push				(arch_word, arch_core*);
 static void			help_pop				(arch_core*);
+void 				help_write_instr_to_mem	(arch_instr* instr, arch_uint size, arch_addr addr);
 
 arch_core* init_core_default()
 {
-	const arch_instr resetjump = {.format = FORMAT_UJF, .opcode = JMP, .data = help_get_arch_addr(intrpt_vector)};
+	const arch_instr resetjump = {.format = FORMAT_UJF, .opcode = JMP, .data = help_get_arch_addr((arch_byte*) intrpt_vector)};
 	*intrpt_vector = (arch_interrupt_table){.reset = resetjump, .undefined = 0, .math = 0, .dma = 0, .software = 0};
 
 	arch_core* core = malloc(sizeof(arch_core));
@@ -82,9 +85,10 @@ arch_core* init_core_default()
 		send_error(bad_malloc);
 	}
 	*core = (arch_core){.regs = {0}, .pipeline = {fetch, decode, no_op}};
-	core->regs.pc = help_get_arch_addr(arch_memory);
+	core->regs.pc = 0;
 	core->cycle_count = 0;
 	core_amount++;
+	core->pcb_reference = NULL;
 	return core;
 }
 
@@ -100,9 +104,10 @@ arch_core* init_core(arch_registers* regs_init, arch_pipe_func* pipeline, arch_a
 	{
 		core->pipeline[i] = pipeline[i];
 	}
-	core->regs.pc = help_get_arch_addr(arch_memory + entry_point);
+	core->regs.pc = help_get_arch_addr((arch_byte*) arch_memory + entry_point);
 	core->cycle_count = 0;
 	core_amount++;
+	core->pcb_reference = NULL;
 	return core;
 }
 
@@ -121,10 +126,16 @@ void cycle(arch_core** core_list, arch_uint core_list_size)
 	{
 		arch_core* core = core_list[i];
 		core->thread = malloc(sizeof(thread));
-		pthread_create(core->thread, NULL, step, core);
-		pthread_join(core->thread, NULL);
+		pthread_create(&core->thread, NULL, step, core);
+		//pthread_join(core->thread, NULL);		These programs should work concurrently.
 	}
 	#endif
+}
+
+void rerun (arch_core* core)
+{
+	core->pipeline[CORE_EXE_STEP-1] = no_op;
+	core->regs.pc -= ARCH_WORD_SIZE;
 }
 
 void thread(arch_core* core, arch_addr entry)
@@ -189,13 +200,23 @@ void step (arch_core* core)
 				core->pipeline[i](core);
 			}
 		}
+
+		
 	} while (is_done_executing == FALSE);
 }
 
 static void fetch(arch_core* core)
 {
-	core->regs.ir.int_rep = *((arch_word*)&arch_memory[core->regs.pc]);
-	core->regs.pc++;
+	if (core->regs.pc < RAM_SIZE * ARCH_WORD_SIZE)
+	{
+		core->regs.ir = *(arch_instr*)(arch_memory + core->regs.pc);
+		printf("performing: 0x%x 0x%x at address %x: 0x%x\n", core->regs.ir.format, core->regs.ir.opcode, core->regs.pc, core->regs.ir.int_rep);
+		core->regs.pc += 4;
+	}
+	else
+	{
+		send_error(ram_outbounds);
+	}
 }
 
 static void decode(arch_core* core)
@@ -509,7 +530,7 @@ static void set_less_imm(arch_core* core)
 
 static void halt(arch_core* core)
 {
-	core->regs.pc--;
+	core->regs.pc -= ARCH_WORD_SIZE;
 }
 
 static void jump(arch_core* core)
@@ -577,23 +598,24 @@ static void branch(arch_core* core)
 
 static void interrupt(arch_core* core)
 {
+	send_error(undefined);
 }
 
 /*		HELPER FUNCTIONS		*/
 
 void help_write_to_mem(arch_byte* data, arch_uint size, arch_addr addr)
 {
-	volatile arch_byte* offset = &(arch_memory[addr]);
+	volatile arch_byte* offset = help_get_ram_addr(addr);
 	arch_uint count = 0;
 
-	while (offset <= &(arch_memory[(RAM_SIZE * ARCH_WORD_SIZE)-1]) && size < count)
+	while (offset <= (arch_memory + (RAM_SIZE * ARCH_WORD_SIZE))-1 && size < count)
 	{
 		*offset = data[count];
 		count++;
 		offset++;
 	}
 
-	if (offset >= &(arch_memory[(RAM_SIZE * ARCH_WORD_SIZE)-1]))
+	if (offset >= (arch_memory + (RAM_SIZE * ARCH_WORD_SIZE))-1)
 	{
 		send_error(ram_outbounds);
 	}
@@ -602,6 +624,22 @@ void help_write_to_mem(arch_byte* data, arch_uint size, arch_addr addr)
 void help_write_to_mem_word(arch_word* word, arch_addr addr)
 {
 	help_write_to_mem((arch_byte*)word, ARCH_WORD_SIZE, addr);
+}
+
+void help_write_instr_to_mem(arch_instr* instr, arch_uint size, arch_addr addr)
+{
+	if (addr%4 != 0)
+	{
+		return;
+	}
+	else
+	{
+		volatile arch_byte* offset = help_get_ram_addr(addr);
+		if (offset + size < arch_memory + (RAM_SIZE * ARCH_WORD_SIZE))
+		{
+			memcpy((arch_byte*)arch_memory+addr, instr, size);
+		}
+	}
 }
 
 static arch_word* help_get_reg(arch_core* core, arch_uint eff_reg)
@@ -630,7 +668,7 @@ static arch_word* help_get_reg(arch_core* core, arch_uint eff_reg)
 
 arch_byte* help_get_ram_addr(arch_addr address)
 {
-	return (arch_byte*)&arch_memory + address;
+	return (arch_byte*)(arch_memory + address);
 }
 
 arch_addr help_get_arch_addr(arch_byte* address)
@@ -639,7 +677,7 @@ arch_addr help_get_arch_addr(arch_byte* address)
 	{
 		return 0;
 	}
-	return(arch_addr)address - (arch_addr)arch_memory ;
+	return(arch_addr)(address - arch_memory);
 }
 
 static void help_push(arch_word value, arch_core* core)

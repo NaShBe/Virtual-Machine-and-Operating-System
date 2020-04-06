@@ -1,5 +1,7 @@
 CC = gcc
-CCFLAGS = -o vmos -g -O0
+EXENAME = vmos
+OUTNAME = context.txt
+CCFLAGS = -o $(EXENAME) -g -O0
 CFLAGS = -I include -c -g -O0
 OBJDEP = architecture.o dispatcher.o handler.o harddrive.o loader.o parse.o process.o scheduler.o vmosmain.o
 HEADERDEP = include/architecture.h include/dispatcher.h include/handler.h include/harddrive.h include/loader.h include/parse.h include/process.h include/scheduler.h include/vmos.h
@@ -31,8 +33,8 @@ process.o: src/process.c
 scheduler.o: src/scheduler.c
 	$(CC) src/scheduler.c $(CFLAGS)
 
-vmosmain.o: include/vmos.h
+vmosmain.o: src/vmosmain.c
 	$(CC) src/vmosmain.c $(CFLAGS)
 
 clean:
-	rm $(OBJDEP)
+	rm $(OBJDEP) $(EXENAME) $(OUTNAME)

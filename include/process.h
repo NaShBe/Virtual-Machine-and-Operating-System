@@ -10,6 +10,7 @@ typedef enum
     exit_success,
     exit_failure,
     loaded,
+    unloaded,
     suspended
 } status_enum;                      /* used by the OS for scheduling, error handling, and unloading */
 

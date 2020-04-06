@@ -37,28 +37,52 @@ void init_scheduler(arch_core** core_array, vmos_uint size)
 void schedule_tasks()
 {
     vmos_int count = 0;
-    while(ready_queue.free != 0 && count < loaded_processes->count)
+    vmos_pcb** waiting_queue;
+    waiting_queue = malloc(sizeof(vmos_pcb*) * core_count);
+    for (vmos_int i = 0; i < core_count; i++)
     {
-        if (loaded_processes->list[count]->pid == ready_queue.current_priority + 1)
+        waiting_queue[i] = NULL;
+    }
+    while(count < loaded_processes->count)
+    {
+        if(loaded_processes->list[count] != NULL)
         {
-            if (loaded_processes->list[count]->program_status == loaded)
+            for (vmos_int i = 0; i < core_count; i++)
             {
-                add_to_queue(loaded_processes->list[count]);
+                if (waiting_queue[i] == NULL || waiting_queue[i]->pid > loaded_processes->list[count]->pid)
+                {
+                    if (loaded_processes->list[count]->program_status == loaded)
+                    {
+                        waiting_queue[i] = loaded_processes->list[count];
+                    }
+                }
             }
-            else
-            {
-                printf("Process %d was not scheduled.", count);
-            } 
         }
         count++;
     }
+    for (vmos_int i = 0; i < core_count; i++)
+    {
+        add_to_queue(waiting_queue[i]);
+    }
 
+    printf("Progress on CPUs: \n");
     for (vmos_int i = 0; i < core_count; i++)
     {
         if (ready_queue.processes[i]->program_status == exit_success || ready_queue.processes[i]->program_status == exit_failure)
         {
             remove_from_queue(i);
         }
+
+        if (cores[i]->pcb_reference == NULL)
+        {
+            printf("CPU %i is currently idle...\n", i);
+        }
+        else
+        {
+            printf("\tCPU %i is currently processing job #%i of priority %i...\n", i, cores[i]->pcb_reference->fd, cores[i]->pcb_reference->pid);
+        }
+        
+        
     }
 }
 
@@ -77,12 +101,12 @@ void add_to_queue(vmos_pcb* process)
             ready_queue.end++;
         }
         ready_queue.free--;
-    }
+    }////
 }
 
 vmos_pcb* remove_from_queue()
 {
-    if (ready_queue.free < core_count)
+    if (ready_queue.free >= core_count)
     {
         return NULL;
     }
@@ -95,6 +119,7 @@ vmos_pcb* remove_from_queue()
     {
         ready_queue.start++;
     }
+    ready_queue.free++;
     return process;
 }
 

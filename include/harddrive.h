@@ -29,8 +29,8 @@ typedef struct
 
 typedef struct
 {
-    arch_byte   storage[DISK_SIZE * 4];
-    arch_files  file_system;
+    arch_byte*   storage;
+    arch_files*  file_system;
     arch_device device;
 } arch_drive;
 

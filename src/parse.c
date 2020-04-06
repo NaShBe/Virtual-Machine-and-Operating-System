@@ -276,15 +276,7 @@ job_list* parse_file(const char* path)
 void output_context(job_list* info, const arch_char* file)
 {
     FILE *fp;
-    if( access( file, F_OK ) != -1 ) {
-        // file exists
-        fp = fopen(file, "w+");
-    }
-    else
-    {
-        // file doesn't exist
-        fp = fopen(file, "w");
-    }
+    fp = fopen(file, "w");
     for (arch_int i = 0; i < info->count; i++)
     {
         fprintf(fp, "// JOB: %i (0x%x) Priority: %i\n", i+1, i+1, info->jobs[i]->priority);

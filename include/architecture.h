@@ -14,6 +14,8 @@
 #define ARCH_WORD_SIZE		sizeof(arch_word)
 #define ARCH_DWORD_SIZE 	sizeof(arch_dword)
 
+#define ARCH_INSTR_SIZE		sizeof(arch_instr)
+
 #define ARCH_INT_SIZE		sizeof(arch_int)
 #define ARCH_UINT_SIZE		sizeof(arch_uint)
 #define ARCH_CHAR_SIZE		sizeof(arch_char)
@@ -26,7 +28,7 @@
 
 /* Interrupt Vector Address and Interrupt Offsets */
 #define INTRPT_OFFSET 	0x0 /* interrupt vector starts at 0x0*/
-#define INTRPT_SIZE  	0x18 /* interrupt vector size */
+#define INTRPT_SIZE  	0x18 * 4 /* interrupt vector size */
 
 #define INTRPT_OFF_RESET INTRPT_OFFSET + 0x0  /* Reset the computer */
 #define INTRPT_OFF_UNDEF INTRPT_OFFSET + 0x4  /* Undefined instruction */
@@ -164,6 +166,7 @@ extern volatile arch_byte arch_memory[RAM_SIZE * ARCH_WORD_SIZE];
 extern arch_core*   init_core_default   	();                         /* will initialize a core for use in cycle() */
 extern arch_core*   init_core   			(arch_registers*, arch_pipe_func*, arch_addr);
 extern void         cycle       			(arch_core**, arch_uint);   /* will cycles through every core in the list */
+extern void			rerun					(arch_core*);
 extern void         thread      			(arch_core*, arch_addr);    /* will jump core into process entry point*/
 extern arch_addr    connect_dma 			(arch_device*);				/* connects a device and provides the address for programming */
 
@@ -172,6 +175,7 @@ extern void 		help_write_to_mem_word	(arch_word*, arch_addr);
 arch_byte*			help_get_ram_addr		(arch_addr);
 arch_addr			help_get_arch_addr		(arch_byte*);
 arch_uint			help_get_instruction	(arch_core*);
+void 				help_write_instr_to_mem	(arch_instr* instr, arch_uint size, arch_addr addr);
 
 
 #endif /* architecture.h */
