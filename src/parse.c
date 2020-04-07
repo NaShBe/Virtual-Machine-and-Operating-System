@@ -238,7 +238,7 @@ job_list* parse_file(const char* path)
                         default:
                             send_error(parser_file_error);
                     }
-                    printf("%i| instr_word: %x, int_rep: %x          format: %x, opcode: %x\n", line_number, instr_word, instr_list->instructions[i].int_rep, instr_list->instructions[i].format, instr_list->instructions[i].opcode); 
+                    printf("%i| instr_word: %08x, int_rep: %08x          format: %x, opcode: %x\n", line_number, instr_word, instr_list->instructions[i].int_rep, instr_list->instructions[i].format, instr_list->instructions[i].opcode); 
                 }
             }
 

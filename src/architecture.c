@@ -209,8 +209,8 @@ static void fetch(arch_core* core)
 {
 	if (core->regs.pc < RAM_SIZE * ARCH_WORD_SIZE)
 	{
-		core->regs.ir = *(arch_instr*)(arch_memory + core->regs.pc);
-		//printf("performing: 0x%x 0x%x at address %x: 0x%x\n", core->regs.ir.format, core->regs.ir.opcode, core->regs.pc, core->regs.ir.int_rep);
+		core->regs.ir.int_rep = *(arch_word*)(arch_memory + core->regs.pc);
+		//printf("0x%x\n", core->regs.ir.int_rep);
 		core->regs.pc += 4;
 	}
 	else
